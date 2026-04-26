@@ -20,6 +20,14 @@
         <div>ChatShowDifficultyText_value :{{ChatShowDifficultyText_value }}</div>
         <div>ChatShowNoteFromDM_value :{{ChatShowNoteFromDM_value }}</div>
     </div>
+    <div class="rncs-flex-row rncs-form-actions">
+        <button type="submit" id="submit">
+            <i class="fa fa-save"></i> Save Changes
+        </button>
+        <button type="button" id="cancel" data-cancel>
+            <i class="fa fa-ban"></i> Cancel
+        </button>
+    </div>
     <div class="rncs-settings-grid">
         <div class="rncs-settings-column">
             {{!-- ChatRemoveConfigureActorButton --}}
@@ -129,13 +137,4 @@
 
         </div>
     </div>
-    <div class="rncs-flex-row rncs-form-actions">
-        <button type="submit" id="submit">
-            <i class="fa fa-save"></i> Save Changes
-        </button>
-        <button type="button" id="cancel" data-cancel>
-            <i class="fa fa-ban"></i> Cancel
-        </button>
-    </div>
-
 </form>
