@@ -443,38 +443,48 @@ class ChatSettings extends foundry.applications.api.HandlebarsApplicationMixin(f
 
 class RollAndDistributionMethodSettings extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
-    AbilitiesRollMethod_choices = {// choices.# represents number of d6
-        "3": game.i18n.localize("RNCS.settings.AbilitiesRollMethod.choices.3"),
-        "4": game.i18n.localize("RNCS.settings.AbilitiesRollMethod.choices.4"),
-        "2": game.i18n.localize("RNCS.settings.AbilitiesRollMethod.choices.2")
+    get AbilitiesRollMethod_choices() {// choices.# represents number of d6
+        return {
+            "3": game.i18n.localize("RNCS.settings.AbilitiesRollMethod.choices.3"),
+            "4": game.i18n.localize("RNCS.settings.AbilitiesRollMethod.choices.4"),
+            "2": game.i18n.localize("RNCS.settings.AbilitiesRollMethod.choices.2")
+        };
     }
 
-    NumberOfSetsRolled_choices = {
-        "6": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.6"),
-        "7": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.7"),
-        "8": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.8"),
-        "9": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.9")
+    get NumberOfSetsRolled_choices() {
+        return {
+            "6": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.6"),
+            "7": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.7"),
+            "8": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.8"),
+            "9": game.i18n.localize("RNCS.settings.NumberOfSetsRolled.choices.9")
+        };
     }
 
-    BonusPoints_choices = {
-        "zero-points": game.i18n.localize("RNCS.settings.BonusPoints.choices.zero-points"),
-        "one-point": game.i18n.localize("RNCS.settings.BonusPoints.choices.one-point"),
-        "one-d-four": game.i18n.localize("RNCS.settings.BonusPoints.choices.one-d-four")
+    get BonusPoints_choices() {
+        return {
+            "zero-points": game.i18n.localize("RNCS.settings.BonusPoints.choices.zero-points"),
+            "one-point": game.i18n.localize("RNCS.settings.BonusPoints.choices.one-point"),
+            "one-d-four": game.i18n.localize("RNCS.settings.BonusPoints.choices.one-d-four")
+        };
     }
 
-    DistributionMethod_choices = {
-        "apply-as-rolled": game.i18n.localize("RNCS.settings.DistributionMethod.choices.apply-as-rolled"),
-        "distribute-freely": game.i18n.localize("RNCS.settings.DistributionMethod.choices.distribute-freely"),
-        "ring-method": game.i18n.localize("RNCS.settings.DistributionMethod.choices.ring-method"),
-        "point-buy-method": game.i18n.localize("RNCS.settings.DistributionMethod.choices.point-buy-method")
+    get DistributionMethod_choices() {
+        return {
+            "apply-as-rolled": game.i18n.localize("RNCS.settings.DistributionMethod.choices.apply-as-rolled"),
+            "distribute-freely": game.i18n.localize("RNCS.settings.DistributionMethod.choices.distribute-freely"),
+            "ring-method": game.i18n.localize("RNCS.settings.DistributionMethod.choices.ring-method"),
+            "point-buy-method": game.i18n.localize("RNCS.settings.DistributionMethod.choices.point-buy-method")
+        };
     }
 
-    static DEFAULT_OPTIONS = {
-        id: "rncs-roll-dist-method",
-        window: { title: "RNCS - " + game.i18n.localize("RNCS.settings.RollMethodAndDistribution.Name") },
-        form: { handler: RollAndDistributionMethodSettings._onSubmit, closeOnSubmit: true },
-        position: { width: 500 }
-    };
+    static get DEFAULT_OPTIONS() {
+        return {
+            id: "rncs-roll-dist-method",
+            window: { title: "RNCS - " + game.i18n.localize("RNCS.settings.RollMethodAndDistribution.Name") },
+            form: { handler: RollAndDistributionMethodSettings._onSubmit, closeOnSubmit: true },
+            position: { width: 500 }
+        };
+    }
 
     static PARTS = {
         form: { template: "./modules/roll-new-character-stats/templates/form-apps/edit-roll-dist-method.hbs" }
