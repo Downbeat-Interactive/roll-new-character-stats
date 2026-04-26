@@ -39,12 +39,14 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
     // Properties
     _settings = new RegisteredSettings;
 
-    static DEFAULT_OPTIONS = {
-        id: "configure-actor",
-        window: { title: game.i18n.localize("RNCS.dialog.results-button.configure-new-actor") },
-        form: { handler: ConfigureActor._onSubmit, closeOnSubmit: true },
-        position: { height: 610, width: 375 }
-    };
+    static get DEFAULT_OPTIONS() {
+        return {
+            id: "configure-actor",
+            window: { title: game.i18n.localize("RNCS.dialog.results-button.configure-new-actor") },
+            form: { handler: ConfigureActor._onSubmit, closeOnSubmit: true },
+            position: { height: 610, width: 375 }
+        };
+    }
 
     static PARTS = {
         form: { template: "./modules/roll-new-character-stats/templates/form-apps/configure-actor.hbs" }
