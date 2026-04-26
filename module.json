@@ -29,8 +29,8 @@
       {"id": "fantastic-depths", "type": "system"}
     ]
   },
-  "manifest": "https://github.com/Downbeat-Interactive/roll-new-character-stats/releases/download/v14.0/module.json",
-  "download": "https://github.com/Downbeat-Interactive/roll-new-character-stats/archive/refs/tags/v14.0.zip",
+  "manifest": "https://github.com/Downbeat-Interactive/roll-new-character-stats/releases/download/v14.01/module.json",
+  "download": "https://github.com/Downbeat-Interactive/roll-new-character-stats/archive/refs/tags/v14.01.zip",
   "url": "https://github.com/Downbeat-Interactive/roll-new-character-stats",
   "readme": "https://github.com/Downbeat-Interactive/roll-new-character-stats/blob/master/README.md",
   "bugs": "https://github.com/Downbeat-Interactive/roll-new-character-stats/issues"
