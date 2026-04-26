@@ -380,12 +380,21 @@ Hooks.on('renderChatSettings', () => {
     Intitialize();
 });
 
+function getFormValue(form, name) {
+    const field = form.elements.namedItem(name);
+    return field?.value ?? "";
+}
+
+function getFormCheckboxValue(form, name) {
+    const field = form.elements.namedItem(name);
+    return field?.checked ?? false;
+}
+
 class ChatSettings extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
     static DEFAULT_OPTIONS = {
         id: "rncs-chat-settings",
         window: { title: "RNCS - Edit Chat Settings" },
-        form: { handler: ChatSettings._onSubmit, closeOnSubmit: true },
         position: { width: 500, height: "auto" }
     };
 
@@ -408,23 +417,39 @@ class ChatSettings extends foundry.applications.api.HandlebarsApplicationMixin(f
         }
     }
 
-    static async _onSubmit(event, form, formData) {
-        if (event.submitter?.id !== "cancel") {
-            const data = formData.object;
-            game.settings.set(settingsKey, "ChatRemoveConfigureActorButton", data.rncs_ChatRemoveConfigureActorButton),
-            game.settings.set(settingsKey, "ChatShowDescription", data.rncs_ChatShowDescription),
-            game.settings.set(settingsKey, "ChatShowMethodText", data.rncs_ChatShowMethodText),
-            game.settings.set(settingsKey, "ChatShowResultsText", data.rncs_ChatShowResultsText),
-            game.settings.set(settingsKey, "ChatShowTotalAbilityScore", data.rncs_ChatShowTotalAbilityScore),
-            game.settings.set(settingsKey, "ChatShowCondensedResults", data.rncs_ChatShowCondensedResults),
-            game.settings.set(settingsKey, "ChatShowDieResultSet", data.rncs_ChatShowDieResultSet),
-            game.settings.set(settingsKey, "ChatShowBonusPointsText", data.rncs_ChatShowBonusPointsText),
-            game.settings.set(settingsKey, "ChatShowDifficultyText", data.rncs_ChatShowDifficultyText),
-            game.settings.set(settingsKey, "ChatShowNoteFromDM", data.rncs_ChatShowNoteFromDM)
-        }
+    async _onFormSubmit(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const form = event.currentTarget;
+        await Promise.all([
+            game.settings.set(settingsKey, "ChatRemoveConfigureActorButton", getFormCheckboxValue(form, "rncs_ChatRemoveConfigureActorButton")),
+            game.settings.set(settingsKey, "ChatShowDescription", getFormCheckboxValue(form, "rncs_ChatShowDescription")),
+            game.settings.set(settingsKey, "ChatShowMethodText", getFormCheckboxValue(form, "rncs_ChatShowMethodText")),
+            game.settings.set(settingsKey, "ChatShowResultsText", getFormCheckboxValue(form, "rncs_ChatShowResultsText")),
+            game.settings.set(settingsKey, "ChatShowTotalAbilityScore", getFormCheckboxValue(form, "rncs_ChatShowTotalAbilityScore")),
+            game.settings.set(settingsKey, "ChatShowCondensedResults", getFormCheckboxValue(form, "rncs_ChatShowCondensedResults")),
+            game.settings.set(settingsKey, "ChatShowDieResultSet", getFormCheckboxValue(form, "rncs_ChatShowDieResultSet")),
+            game.settings.set(settingsKey, "ChatShowBonusPointsText", getFormCheckboxValue(form, "rncs_ChatShowBonusPointsText")),
+            game.settings.set(settingsKey, "ChatShowDifficultyText", getFormCheckboxValue(form, "rncs_ChatShowDifficultyText")),
+            game.settings.set(settingsKey, "ChatShowNoteFromDM", getFormCheckboxValue(form, "rncs_ChatShowNoteFromDM"))
+        ]);
+
+        this.close();
     }
 
     _onRender(context, options) {
+        const form = this.element.querySelector("form");
+        form?.addEventListener("submit", (event) => {
+            void this._onFormSubmit(event);
+        });
+
+        this.element.querySelector("[data-cancel]")?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            this.close();
+        });
+
         this.element.querySelectorAll(".rncs-form-group").forEach(group => {
             group.addEventListener("click", (event) => {
                 // Skip if clicking the text input or its label
@@ -481,7 +506,6 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
         return {
             id: "rncs-roll-dist-method",
             window: { title: "RNCS - " + game.i18n.localize("RNCS.settings.RollMethodAndDistribution.Name") },
-            form: { handler: RollAndDistributionMethodSettings._onSubmit, closeOnSubmit: true },
             position: { width: 500 }
         };
     }
@@ -509,23 +533,39 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
         }
     }
 
-    static async _onSubmit(event, form, formData) {
-        if (event.submitter?.id !== "cancel") {
-            const data = formData.object;
-            game.settings.set(settingsKey, "AbilitiesRollMethod", data.rncs_AbilitiesRollMethod),
-            game.settings.set(settingsKey, "DropLowestDieRoll", data.rncs_DropLowestDieRoll),
-            game.settings.set(settingsKey, "ReRollOnes", data.rncs_ReRollOnes),
-            game.settings.set(settingsKey, "NumberOfSetsRolled", data.rncs_NumberOfSetsRolled),
-            game.settings.set(settingsKey, "DropLowestSet", data.rncs_DropLowestSet),
-            game.settings.set(settingsKey, "BonusPoints", data.rncs_BonusPoints),
-            game.settings.set(settingsKey, "Over18Allowed", data.rncs_Over18Allowed),
-            game.settings.set(settingsKey, "MinimumAbilityTotal", data.rncs_MinimumAbilityTotal),
-            game.settings.set(settingsKey, "MaximumAbilityTotal", data.rncs_MaximumAbilityTotal),
-            game.settings.set(settingsKey, "DistributionMethod", data.rncs_DistributionMethod)
-        }
+    async _onFormSubmit(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const form = event.currentTarget;
+        await Promise.all([
+            game.settings.set(settingsKey, "AbilitiesRollMethod", Number(getFormValue(form, "rncs_AbilitiesRollMethod"))),
+            game.settings.set(settingsKey, "DropLowestDieRoll", getFormCheckboxValue(form, "rncs_DropLowestDieRoll")),
+            game.settings.set(settingsKey, "ReRollOnes", getFormCheckboxValue(form, "rncs_ReRollOnes")),
+            game.settings.set(settingsKey, "NumberOfSetsRolled", Number(getFormValue(form, "rncs_NumberOfSetsRolled"))),
+            game.settings.set(settingsKey, "DropLowestSet", getFormCheckboxValue(form, "rncs_DropLowestSet")),
+            game.settings.set(settingsKey, "BonusPoints", getFormValue(form, "rncs_BonusPoints")),
+            game.settings.set(settingsKey, "Over18Allowed", getFormCheckboxValue(form, "rncs_Over18Allowed")),
+            game.settings.set(settingsKey, "MinimumAbilityTotal", Number(getFormValue(form, "rncs_MinimumAbilityTotal") || 0)),
+            game.settings.set(settingsKey, "MaximumAbilityTotal", Number(getFormValue(form, "rncs_MaximumAbilityTotal") || 0)),
+            game.settings.set(settingsKey, "DistributionMethod", getFormValue(form, "rncs_DistributionMethod"))
+        ]);
+
+        this.close();
     }
 
     _onRender(context, options) {
+        const form = this.element.querySelector("form");
+        form?.addEventListener("submit", (event) => {
+            void this._onFormSubmit(event);
+        });
+
+        this.element.querySelector("[data-cancel]")?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            this.close();
+        });
+
         this.element.querySelectorAll(".rncs-form-group").forEach(group => {
             group.addEventListener("click", (event) => {
                 // Skip if clicking the text input or its label
