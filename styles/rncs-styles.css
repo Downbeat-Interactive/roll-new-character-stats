@@ -103,7 +103,6 @@
     background: rgba(58, 46, 55, 0.92);
     padding: 1px 3px;
     margin: 0;
-    color: #f3eee5;
     font-family: inherit;
     font-size: inherit;
     text-align: inherit;
@@ -113,9 +112,12 @@
     width: 100%;
   }
 
+  .rncs-input {
+    color: #f3eee5;
+  }
+
   .rncs-select {
     width: 100%;
-    color: #ffffff !important;
     -webkit-text-fill-color: #ffffff;
     opacity: 1;
   }
@@ -223,6 +225,7 @@
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-items: center;
+    color: #ffffff;
   }
 
   .rncs-form-group:hover {
@@ -282,13 +285,11 @@
 
   .rncs-settings-form input[type="text"],
   .rncs-settings-form input[type="number"],
-  .rncs-settings-form select,
   .rncs-settings-form textarea {
     color: #f3eee5;
   }
 
   .rncs-settings-form select {
-    color: #ffffff !important;
     -webkit-text-fill-color: #ffffff;
     opacity: 1;
   }

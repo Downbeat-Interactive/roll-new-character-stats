@@ -34,6 +34,10 @@ function dragstart_handler(ev) {
     ev.dataTransfer.dropEffect = "copy";
 }
 
+function getFormObject(form) {
+    return Object.fromEntries(new FormData(form).entries());
+}
+
 export class ConfigureActor extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
     // Properties
@@ -43,7 +47,6 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
         return {
             id: "configure-actor",
             window: { title: game.i18n.localize("RNCS.dialog.results-button.configure-new-actor") },
-            form: { handler: ConfigureActor._onSubmit, closeOnSubmit: true },
             position: { height: 610, width: 375 }
         };
     }
@@ -185,10 +188,8 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
         };
     }
     
-    static async _onSubmit(event, form, formData) {
-
+    static async _submitActorData(data) {
         const owner = this.owner_id;
-        const data = formData.object;
         let actor = await Actor.create({
             name: ((data.character_name === "New Actor" || data.character_name === "") && data.select_race !== "" ? data.select_race : data.character_name),
             permission: { [owner]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
@@ -200,34 +201,54 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
         switch (game.system.id) {
             case "dnd5e":
                 let dnd5e_actor_helper = new dnd5e_ActorHelper(actor);
-                dnd5e_actor_helper._Update(data);
+                await dnd5e_actor_helper._Update(data);
                 break;
             case "pf1":
                 let pf1_actor_helper = new pf1_ActorHelper(actor);
-                pf1_actor_helper._Update(data);
+                await pf1_actor_helper._Update(data);
                 break;
             case "ose":
                 let ose_actor_helper = new ose_ActorHelper(actor);
-                ose_actor_helper._Update(data);
+                await ose_actor_helper._Update(data);
                 break;
             case "archmage":
                 let archmage_actor_helper = new archmage_ActorHelper(actor);
-                archmage_actor_helper._Update(data);
+                await archmage_actor_helper._Update(data);
                 break;
             case "dcc":
                 let dcc_actor_helper = new dcc_ActorHelper(actor);
-                dcc_actor_helper._Update(data);
+                await dcc_actor_helper._Update(data);
                 break;
             case "osric":
                 let osric_actor_helper = new osric_ActorHelper(actor);
-                osric_actor_helper._Update(data);
+                await osric_actor_helper._Update(data);
                 break;
             case "fantastic-depths":
                 let fd_actor_helper = new fd_ActorHelper(actor);
-                fd_actor_helper._Update(data);
+                await fd_actor_helper._Update(data);
                 break;
             default:
         }
+    }
+
+    static async _onSubmit(event, form, formData) {
+        return ConfigureActor._submitActorData.call(this, formData.object);
+    }
+
+    async _onFormSubmit(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const data = getFormObject(event.currentTarget);
+        await ConfigureActor._submitActorData.call(this, data);
+        this.close();
+    }
+
+    _onRender(context, options) {
+        const form = this.element.querySelector("form");
+        form?.addEventListener("submit", (event) => {
+            void this._onFormSubmit(event);
+        });
     }
 }
 

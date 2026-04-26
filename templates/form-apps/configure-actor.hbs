@@ -1,4 +1,4 @@
-<form>
+<form onsubmit="return false;">
     <script>
         /* global CONFIG */
         individual_rolls = null;
@@ -249,10 +249,11 @@
             }
 
             // Enable/Disable submit Button
-            // character_name has nothing to do with scores, I am just being lazy with submit.disable 
+            // character_name has nothing to do with scores, I am just being lazy with submit_button.disable 
             const character_name = document.getElementById("character_name");
             const bp_remaining = parseInt(span_bp_remaining.innerText);
-            submit.disabled = (character_name.value.length === 0 || GetNextEmptyDropZone(".rncs-ability-drop-zone") || bp_remaining > 0 || (score_over_18 && over18NotAllowed));
+            const submit_button = document.getElementById("configure_actor_submit");
+            submit_button.disabled = (character_name.value.length === 0 || GetNextEmptyDropZone(".rncs-ability-drop-zone") || bp_remaining > 0 || (score_over_18 && over18NotAllowed));
         }
 
         async function MoveResult(ev) {
@@ -484,7 +485,7 @@
 
     <div style="margin-bottom:5px;">
         <div class="rncs-div-label">Name:</div>
-        <!-- Name has nothing to do with scores, I am just being lazy with submit.disable -->
+        <!-- Name has nothing to do with scores, I am just being lazy with submit_button.disable -->
         <div class="rncs-div-user-input">
             <input class="rncs-input" id="character_name" name="character_name" onchange="RecalcFinalScores()" type="String"
                 value="{{character_name}}" />
@@ -650,7 +651,7 @@
         {{/each}}
     </table>
 
-    <button type="submit" id="submit" disabled>
+    <button type="submit" id="configure_actor_submit" disabled>
         <i class="fa fa-check"></i> {{localize "RNCS.form-app.form-text.accept-new-actor"}}
     </button>
 

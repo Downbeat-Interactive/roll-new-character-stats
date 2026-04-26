@@ -93,8 +93,21 @@ Hooks.on("renderChatMessage", (chatMessage, html) => {
 });
 
 Hooks.on("ready", () => {
+	refreshModuleStylesheet();
 	if (game.user.isGM) { VersionUpdateValidation(); }
 });
+
+function refreshModuleStylesheet() {
+	const cacheBuster = `${game.modules.get(RNCS.ID)?.version ?? "dev"}-${Date.now()}`;
+	const stylesheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+		.filter((link) => link.href.includes(`${RNCS.ID}/styles/rncs-styles.css`));
+
+	for (const link of stylesheetLinks) {
+		const url = new URL(link.href, window.location.href);
+		url.searchParams.set("v", cacheBuster);
+		link.href = url.toString();
+	}
+}
 
 async function VersionUpdateValidation() {
 
