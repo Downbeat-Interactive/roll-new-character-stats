@@ -482,7 +482,7 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
             id: "rncs-roll-dist-method",
             window: { title: "RNCS - " + game.i18n.localize("RNCS.settings.RollMethodAndDistribution.Name") },
             form: { handler: RollAndDistributionMethodSettings._onSubmit, closeOnSubmit: true },
-            position: { width: 500, height: 760 }
+            position: { width: 500 }
         };
     }
 

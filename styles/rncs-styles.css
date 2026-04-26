@@ -298,22 +298,17 @@
     color: #c9beb0;
   }
 
-  #rncs-roll-dist-method,
-  #rncs-chat-settings {
-    height: min(80vh, 760px);
-  }
-
   #rncs-roll-dist-method .window-content,
   #rncs-chat-settings .window-content {
-    height: 100%;
-    min-height: 0;
+    display: block;
+    max-height: min(70vh, 42rem);
     overflow-y: auto;
     padding-bottom: 0.75rem;
   }
 
   #rncs-roll-dist-method .window-content form,
   #rncs-chat-settings .window-content form {
-    min-height: max-content;
+    min-height: 0;
   }
 
   .rncs-settings-form .rncs-select option,
