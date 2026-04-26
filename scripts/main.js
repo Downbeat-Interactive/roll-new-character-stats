@@ -56,12 +56,12 @@ Hooks.on("renderChatMessageHTML", (app, html) => {
 	}
 });
 
-Hooks.on("renderChatMessage", (chatMessage, html, data) => {
+Hooks.on("renderChatMessage", (chatMessage, html) => {
 	// Check if the message is from RNCS
 	if (chatMessage.flags?.roll_new_character_stats) {
 		// Find the Configure Actor button
-		const configureButton = html.find(".rncs-configure-new-actor button[data-action='configure_new_actor']");
-		configureButton.on("click", (event) => {
+		const configureButton = html.querySelector(".rncs-configure-new-actor button[data-action='configure_new_actor']");
+		configureButton?.addEventListener("click", (event) => {
 			event.preventDefault(); // Prevent default behavior
 			const msgId = chatMessage.id;
 			const flags = chatMessage.flags.roll_new_character_stats;
@@ -148,7 +148,7 @@ function RemoveButton(msgId) {
 	let chatMessage = game.messages?.get(msgId);
 	if (!chatMessage)
 		return;
-	let content = chatMessage && foundry.utils.duplicate(chatMessage.content);
+	let content = chatMessage && structuredClone(chatMessage.content);
 	const configure_actor_button = /<button data-action="configure_new_actor">[^<]*<\/button>/;
 	content = content?.replace(configure_actor_button, "");
 	chatMessage.update({ content });
@@ -177,7 +177,7 @@ async function FormApp_ConfigureActor(target,
 		individual_rolls,
 		Over18Allowed,
 		DistributionMethod,
-		HideResultsZone).render(true);
+		HideResultsZone).render({ force: true });
 
 }
 
@@ -211,9 +211,10 @@ export async function RollStats() {
 		question = game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
 	}
 
-	const confirmed = await Dialog.confirm({
-		title: title,
-		content: "<small>" + dice_roller.GetMethodText() + "<p>" + question + "</p></small>"
+	const confirmed = await foundry.applications.api.DialogV2.confirm({
+		window: { title: title },
+		content: "<small>" + dice_roller.GetMethodText() + "<p>" + question + "</p></small>",
+		rejectClose: false
 	});
 
 	if (confirmed) {

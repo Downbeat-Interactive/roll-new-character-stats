@@ -34,15 +34,26 @@ function dragstart_handler(ev) {
     ev.dataTransfer.dropEffect = "copy";
 }
 
-export class ConfigureActor extends FormApplication {
+export class ConfigureActor extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
     // Properties
     _settings = new RegisteredSettings;
 
+    static DEFAULT_OPTIONS = {
+        id: "configure-actor",
+        window: { title: game.i18n.localize("RNCS.dialog.results-button.configure-new-actor") },
+        form: { handler: ConfigureActor._onSubmit, closeOnSubmit: true },
+        position: { height: 610, width: 375 }
+    };
+
+    static PARTS = {
+        form: { template: "./modules/roll-new-character-stats/templates/form-apps/configure-actor.hbs" }
+    };
+
     constructor(owner_id, final_results, bonus_points, other_properties_results, individual_rolls, Over18Allowed, DistributionMethod, HideResultsZone) {
-        super(); 
+        super({});
         this.owner_id = owner_id,
-        this.final_results = final_results, 
+        this.final_results = final_results,
         this.bonus_points = bonus_points,
         this.other_properties_results = other_properties_results,
         this.individual_rolls = individual_rolls,
@@ -51,21 +62,8 @@ export class ConfigureActor extends FormApplication {
         this.HideResultsZone = HideResultsZone
     }
 
-    static get defaultOptions() {
-
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            title: game.i18n.localize("RNCS.dialog.results-button.configure-new-actor"),
-            id: 'configure-actor',
-            template: "./modules/roll-new-character-stats/templates/form-apps/configure-actor.hbs",
-            height: 610, 
-            width: 375,
-            closeOnSubmit: true,
-            submitOnClose: false
-        });
-    }
-
     // Send data to Configure Actor form
-    async getData() {
+    async _prepareContext(options) {
         
         // Use [game-system]-actor-handler class roll "other properties" to be displayed on form application.
         // these are only necessary if enhanced support is intended
@@ -184,11 +182,12 @@ export class ConfigureActor extends FormApplication {
         };
     }
     
-    async _updateObject(event, formData) {
+    static async _onSubmit(event, form, formData) {
 
         const owner = this.owner_id;
+        const data = formData.object;
         let actor = await Actor.create({
-            name: ((formData.character_name === "New Actor" || formData.character_name === "") && formData.select_race !== "" ? formData.select_race : formData.character_name),
+            name: ((data.character_name === "New Actor" || data.character_name === "") && data.select_race !== "" ? data.select_race : data.character_name),
             permission: { [owner]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
             type: game_system_helper.getSystemActorType(),
             img: "icons/svg/mystery-man.svg"
@@ -198,31 +197,31 @@ export class ConfigureActor extends FormApplication {
         switch (game.system.id) {
             case "dnd5e":
                 let dnd5e_actor_helper = new dnd5e_ActorHelper(actor);
-                dnd5e_actor_helper._Update(formData);
+                dnd5e_actor_helper._Update(data);
                 break;
             case "pf1":
                 let pf1_actor_helper = new pf1_ActorHelper(actor);
-                pf1_actor_helper._Update(formData);
+                pf1_actor_helper._Update(data);
                 break;
             case "ose":
                 let ose_actor_helper = new ose_ActorHelper(actor);
-                ose_actor_helper._Update(formData);
+                ose_actor_helper._Update(data);
                 break;
             case "archmage":
                 let archmage_actor_helper = new archmage_ActorHelper(actor);
-                archmage_actor_helper._Update(formData);
+                archmage_actor_helper._Update(data);
                 break;
             case "dcc":
                 let dcc_actor_helper = new dcc_ActorHelper(actor);
-                dcc_actor_helper._Update(formData);
+                dcc_actor_helper._Update(data);
                 break;
             case "osric":
                 let osric_actor_helper = new osric_ActorHelper(actor);
-                osric_actor_helper._Update(formData);
+                osric_actor_helper._Update(data);
                 break;
             case "fantastic-depths":
                 let fd_actor_helper = new fd_ActorHelper(actor);
-                fd_actor_helper._Update(formData);
+                fd_actor_helper._Update(data);
                 break;
             default:
         }

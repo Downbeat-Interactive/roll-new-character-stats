@@ -7,7 +7,7 @@
   "version": "3.2.3",
   "compatibility": {
     "minimum": "13",
-    "verified": "13"
+    "verified": "14"
   },
   "styles": ["styles/rncs-styles.css"],
   "esmodules": ["scripts/main.js"],
