@@ -39,6 +39,9 @@
                 case "dnd5e":
                 case "fantastic-depths":
                     // Always show Score column because players can select Race during Configuration
+                    if (ability_scores.dataset.hideracebonuscolumn === "true") {
+                        HideRaceBonusColumn();
+                    }
                     break;
                 case "pf1":
                     HideScoreColumn(hide_score_col);
@@ -76,8 +79,13 @@
         }
 
         function HideRaceOptions() {
-            // Hide Race selector and Race Bonus column            
+            // Hide Race selector and Race Bonus column
             document.getElementById("race-selector")?.classList.add("rncs-display-none");
+            HideColumn(".rncs-race-mod-header", ".rncs-racial-mod");
+        }
+
+        function HideRaceBonusColumn() {
+            // Hide Race Bonus column only (keep species selector visible for flavor)
             HideColumn(".rncs-race-mod-header", ".rncs-racial-mod");
         }
 
@@ -297,6 +305,11 @@
         }
 
         async function UpdateRaceBonus(ev) {
+            // In 2024 mode, species do not grant ability score bonuses
+            if (ability_scores.dataset.hideracebonuscolumn === "true") {
+                RecalcFinalScores();
+                return;
+            }
             // Get racial bonuses
             const select = document.getElementById(ev.target.id);
             const jsonDATA = await getJSONData("./modules/roll-new-character-stats/data/character-properties.json");
@@ -591,11 +604,12 @@
         </tr>
     </table>
 
-    <table id="ability_scores" 
-        data-over18allowed={{Over18Allowed}} 
+    <table id="ability_scores"
+        data-over18allowed={{Over18Allowed}}
         data-distributionmethod={{DistributionMethod}}
-        data-bonus_points={{bonus_points}} 
-        data-hideresultszone={{HideResultsZone}}>
+        data-bonus_points={{bonus_points}}
+        data-hideresultszone={{HideResultsZone}}
+        data-hideracebonuscolumn={{hide_racial_bonus}}>
 
         <tr id="header_row" class="rncs-header-row">
             <th>Ability</th>

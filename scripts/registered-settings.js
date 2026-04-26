@@ -8,6 +8,7 @@ export class RegisteredSettings{
     NameFormat = game.settings.get(settingsKey, "NameFormat");
     HideResultsZone = game.settings.get(settingsKey, "HideResultsZone");
     ReverseRingMethodScrolling = game.settings.get(settingsKey, "ReverseRingMethodScrolling");
+    DnD5eRuleset = game.settings.get(settingsKey, "DnD5eRuleset");
     ShowOtherPropertyResults = game.settings.get(settingsKey, "ShowOtherPropertyResults");
     IncludeResultDescription = game.settings.get(settingsKey, "IncludeResultDescription");
 

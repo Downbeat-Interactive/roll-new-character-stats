@@ -28,7 +28,15 @@
       },
       "HideResultsZone": {
         "Name": "Hide Results Zone",
-        "Hint": "This setting will hide Results Zone when \"Apply as Rolled\" or \"Point Buy\" is selected."      
+        "Hint": "This setting will hide Results Zone when \"Apply as Rolled\" or \"Point Buy\" is selected."
+      },
+      "DnD5eRuleset": {
+        "Name": "D&D 5e Ruleset",
+        "Hint": "Select which D&D 5e ruleset to use. In 2024 mode, species do not grant ability score bonuses.",
+        "choices": {
+          "2014": "2014 (PHB)",
+          "2024": "2024 (PHB)"
+        }
       },
       "ReverseRingMethodScrolling": {
         "Name": "Reverse Ring Method Scrolling",

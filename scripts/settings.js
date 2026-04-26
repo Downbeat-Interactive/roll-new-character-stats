@@ -105,6 +105,19 @@ export function registerSettings() {
         default: false
     });
 
+    game.settings.register(settingsKey, "DnD5eRuleset", {
+        name: game.i18n.localize("RNCS.settings.DnD5eRuleset.Name"),
+        hint: game.i18n.localize("RNCS.settings.DnD5eRuleset.Hint"),
+        scope: "world",
+        config: game.system.id === "dnd5e",
+        type: String,
+        choices: {
+            "2014": game.i18n.localize("RNCS.settings.DnD5eRuleset.choices.2014"),
+            "2024": game.i18n.localize("RNCS.settings.DnD5eRuleset.choices.2024")
+        },
+        default: "2014"
+    });
+
     game.settings.register(settingsKey, "ShowOtherPropertyResults", {
         name: game.i18n.localize("RNCS.settings.ShowOtherPropertyResults.Name"),
         hint: game.i18n.localize("RNCS.settings.ShowOtherPropertyResults.Hint"),

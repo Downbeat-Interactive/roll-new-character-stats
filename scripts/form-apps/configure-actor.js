@@ -132,6 +132,7 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
             individual_rolls: this.individual_rolls.map(x => x.result),
             Over18Allowed: this.Over18Allowed,
             DistributionMethod: this.DistributionMethod,
+            hide_racial_bonus: game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024",
             HideResultsZone: this.HideResultsZone,
 
             // BEGIN Common Character data
