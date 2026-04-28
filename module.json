@@ -4,7 +4,7 @@
   "title": "Roll New Character Stats (RNCS)",
   "description": "Small mod for rolling new table-top-rpg character stats to get your game rolling!",
   "authors": [{"name": "Richard Fox"}],
-  "version": "3.2.3",
+  "version": "3.2.4",
   "compatibility": {
     "minimum": "13",
     "verified": "14"
@@ -29,8 +29,8 @@
       {"id": "fantastic-depths", "type": "system"}
     ]
   },
-  "manifest": "https://github.com/Downbeat-Interactive/roll-new-character-stats/releases/download/v14.07/module.json",
-  "download": "https://github.com/Downbeat-Interactive/roll-new-character-stats/archive/refs/tags/v14.07.zip",
+  "manifest": "https://github.com/Downbeat-Interactive/roll-new-character-stats/releases/download/latest/module.json",
+  "download": "https://github.com/Downbeat-Interactive/roll-new-character-stats/archive/refs/tags/v14.08.zip",
   "url": "https://github.com/Downbeat-Interactive/roll-new-character-stats",
   "readme": "https://github.com/Downbeat-Interactive/roll-new-character-stats/blob/master/README.md",
   "bugs": "https://github.com/Downbeat-Interactive/roll-new-character-stats/issues"

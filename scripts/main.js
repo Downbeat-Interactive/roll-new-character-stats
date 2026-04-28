@@ -46,22 +46,42 @@ async function onRenderActorDirectory(app, html) {
 	});
 }
 
-Hooks.on("renderChatMessageHTML", (app, html) => {
+Hooks.on("renderChatMessageHTML", (chatMessage, html) => {
+	onRenderChatMessage(chatMessage, html);
+});
+
+Hooks.on("renderChatMessage", (chatMessage, html) => {
+	onRenderChatMessage(chatMessage, html);
+});
+
+function getChatMessageElement(html) {
+	if (!html) return null;
+	if (typeof html.querySelector === "function") return html;
+	if (typeof html[0]?.querySelector === "function") return html[0];
+	return null;
+}
+
+function onRenderChatMessage(chatMessage, html) {
+	const element = getChatMessageElement(html);
+	if (!element) return;
+
 	// Find buttons with class "rncs-configure-new-actor"
-	const buttons = html.querySelectorAll(".rncs-configure-new-actor");
+	const buttons = element.querySelectorAll(".rncs-configure-new-actor");
 	if (!game.user.can("ACTOR_CREATE")) {
 		buttons.forEach(button => {
 			button.classList.add("rncs-display-none");
 		});
+		return;
 	}
-});
 
-Hooks.on("renderChatMessage", (chatMessage, html) => {
 	// Check if the message is from RNCS
 	if (chatMessage.flags?.roll_new_character_stats) {
 		// Find the Configure Actor button
-		const configureButton = html.querySelector(".rncs-configure-new-actor button[data-action='configure_new_actor']");
-		configureButton?.addEventListener("click", (event) => {
+		const configureButton = element.querySelector(".rncs-configure-new-actor button[data-action='configure_new_actor']");
+		if (!configureButton || configureButton.dataset.rncsListenerAttached) return;
+		configureButton.dataset.rncsListenerAttached = "true";
+
+		configureButton.addEventListener("click", (event) => {
 			event.preventDefault(); // Prevent default behavior
 			const msgId = chatMessage.id;
 			const flags = chatMessage.flags.roll_new_character_stats;
@@ -90,7 +110,7 @@ Hooks.on("renderChatMessage", (chatMessage, html) => {
 			);
 		});
 	}
-});
+}
 
 Hooks.on("ready", () => {
 	refreshModuleStylesheet();
