@@ -376,10 +376,6 @@ export function registerSettings() {
     console.log(RNCS.ID + " | Registered Settings");
 }
 
-Hooks.on('renderChatSettings', () => {
-    Intitialize();
-});
-
 function getFormValue(form, name) {
     const field = form.elements.namedItem(name);
     return field?.value ?? "";
@@ -443,6 +439,10 @@ class ChatSettings extends foundry.applications.api.HandlebarsApplicationMixin(f
         form?.addEventListener("submit", (event) => {
             void this._onFormSubmit(event);
         });
+
+        if (game.system.id !== "dcc") {
+            this.element.querySelector("#rncs_Chat_Show_Description")?.classList.add("rncs-display-none");
+        }
 
         this.element.querySelector("[data-cancel]")?.addEventListener("click", (event) => {
             event.preventDefault();
