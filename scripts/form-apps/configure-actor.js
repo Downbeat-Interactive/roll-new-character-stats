@@ -109,6 +109,8 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
             default:
         }
 
+        const hideRaceOptions = game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024";
+
         return {
             // Data passed to ConfigureActor form application
             final_results: this.final_results,
@@ -116,7 +118,8 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
             individual_rolls: this.individual_rolls.map(x => x.result),
             Over18Allowed: this.Over18Allowed,
             DistributionMethod: this.DistributionMethod,
-            hide_racial_bonus: game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024",
+            hide_racial_bonus: hideRaceOptions,
+            hide_race_options: hideRaceOptions,
             HideResultsZone: this.HideResultsZone,
 
             // BEGIN Common Character data
@@ -169,8 +172,10 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
     
     static async _submitActorData(data) {
         const owner = this.owner_id;
+        const characterName = data.character_name ?? "";
+        const selectedRace = data.select_race ?? "";
         let actor = await Actor.create({
-            name: ((data.character_name === "New Actor" || data.character_name === "") && data.select_race !== "" ? data.select_race : data.character_name),
+            name: ((characterName === "New Actor" || characterName === "") && selectedRace !== "" ? selectedRace : characterName),
             permission: { [owner]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
             type: game_system_helper.getSystemActorType(),
             img: "icons/svg/mystery-man.svg"
@@ -332,7 +337,9 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
         switch (game.system.id) {
             case "dnd5e":
             case "fantastic-depths":
-                if (abilityScores.dataset.hideracebonuscolumn === "true") {
+                if (abilityScores.dataset.hideraceoptions === "true") {
+                    this._hideRaceOptions();
+                } else if (abilityScores.dataset.hideracebonuscolumn === "true") {
                     this._hideRaceBonusColumn();
                 }
                 break;
