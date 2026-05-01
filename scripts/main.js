@@ -247,16 +247,19 @@ export async function RollStats() {
 		? game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
 		: game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
 
-	const dialogContent = `<small><div class="rncs-method-picker">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
+	const methodPickerId = "rncs-method-picker-" + Date.now().toString(36) + Math.random().toString(36).slice(2);
+	const dialogContent = `<small><div class="rncs-method-picker" data-rncs-method-picker-id="${methodPickerId}">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
 
 	const onRenderDialog = (app, html) => {
 		const root = html instanceof HTMLElement ? html : html?.[0];
-		const picker = root?.querySelector?.(".rncs-method-picker");
+		const picker = root?.querySelector?.(`.rncs-method-picker[data-rncs-method-picker-id="${methodPickerId}"]`);
 		if (!picker) return;
 
-		Hooks.off("renderDialogV2", onRenderDialog);
 		const select = picker.querySelector("select[name='rncs_method']");
-		select?.addEventListener("change", () => UpdateMethodDescription(select));
+		if (select && select.dataset.rncsDescriptionListener !== "true") {
+			select.dataset.rncsDescriptionListener = "true";
+			select.addEventListener("change", () => UpdateMethodDescription(select));
+		}
 	};
 	Hooks.on("renderDialogV2", onRenderDialog);
 
