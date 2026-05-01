@@ -1,0 +1,90 @@
+name: Release
+
+on:
+    release:
+        types: [published]
+
+env:
+    package_type: module
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Extract tag version number
+              id: get_version
+              uses: battila7/get-version-action@v2
+
+            - name: Update manifest, download, and version in module.json
+              run: |
+                  jq \
+                    --arg version "${{ steps.get_version.outputs.version-without-v }}" \
+                    --arg manifest "https://github.com/${{ github.repository }}/releases/latest/download/${{ env.package_type }}.json" \
+                    --arg download "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/${{ env.package_type }}.zip" \
+                    '.version = $version | .manifest = $manifest | .download = $download' \
+                    module.json > module.json.tmp && mv module.json.tmp module.json
+
+            - name: Create zip
+              run: |
+                  zip -r ${{ env.package_type }}.zip \
+                    module.json \
+                    scripts/ \
+                    styles/ \
+                    templates/ \
+                    lang/ \
+                    data/
+
+            - name: Create release assets
+              uses: ncipollo/release-action@v1
+              with:
+                  allowUpdates: true
+                  name: ${{ github.event.release.name }}
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  artifacts: "module.json, ${{ env.package_type }}.zip"
+                  tag: ${{ github.event.release.tag_name }}
+                  body: ${{ github.event.release.body }}
+
+            - name: Get Module ID
+              id: moduleID
+              uses: notiz-dev/github-action-json-property@release
+              with:
+                  path: "module.json"
+                  prop_path: "id"
+
+            - name: Get minimum compatibility
+              id: minimum
+              uses: notiz-dev/github-action-json-property@release
+              with:
+                  path: "module.json"
+                  prop_path: "compatibility.minimum"
+
+            - name: Get verified compatibility
+              id: verified
+              uses: notiz-dev/github-action-json-property@release
+              with:
+                  path: "module.json"
+                  prop_path: "compatibility.verified"
+
+            - name: Publish to Foundry VTT package repository
+              uses: fjogeleit/http-request-action@v1
+              with:
+                  url: "https://api.foundryvtt.com/_api/packages/release_version"
+                  method: "POST"
+                  customHeaders: '{"Content-Type": "application/json", "Authorization": "${{ secrets.FOUNDRY_KEY }}"}'
+                  data: >-
+                      {
+                        "id": "${{ steps.moduleID.outputs.prop }}",
+                        "release": {
+                          "version": "${{ steps.get_version.outputs.version-without-v }}",
+                          "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/${{ env.package_type }}.json",
+                          "notes": "https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}",
+                          "compatibility": {
+                            "minimum": "${{ steps.minimum.outputs.prop }}",
+                            "verified": "${{ steps.verified.outputs.prop }}"
+                          }
+                        }
+                      }
+                  preventFailureOnNoResponse: true
