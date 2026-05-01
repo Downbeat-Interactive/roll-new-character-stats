@@ -9,6 +9,7 @@ import osric_ActorHelper from "../helpers/osric-actor-helper.js";
 import fd_ActorHelper from "../helpers/fd-actor-helper.js";
 
 const game_system_helper = new GAME_SYSTEM_Helper();
+const DND5E_2024_RULESET = "2024";
 
 Hooks.on('renderConfigureActor', () => {
     Initialize();
@@ -649,7 +650,7 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
             individual_rolls: this.individual_rolls.map(x => x.result),
             Over18Allowed: this.Over18Allowed,
             DistributionMethod: this.DistributionMethod,
-            hide_racial_bonus: game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024",
+            hide_racial_bonus: game.system.id === "dnd5e" && this._settings.DnD5eRuleset === DND5E_2024_RULESET,
             HideResultsZone: this.HideResultsZone,
 
             // BEGIN Common Character data
@@ -704,7 +705,7 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
 
         const owner = this.owner_id;
         const data = formData.object;
-        const effectiveRaceName = game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024" ? "" : data.select_race;
+        const effectiveRaceName = game.system.id === "dnd5e" && this._settings.DnD5eRuleset === DND5E_2024_RULESET ? "" : data.select_race;
         let actor = await Actor.create({
             name: ((data.character_name === "New Actor" || data.character_name === "") && effectiveRaceName ? effectiveRaceName : data.character_name),
             permission: { [owner]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
