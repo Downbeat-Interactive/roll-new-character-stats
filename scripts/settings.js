@@ -334,10 +334,19 @@ export function registerSettings() {
         restricted: true,
     });
 
+    game.settings.register(settingsKey, "AllowedDistributionMethods", {
+        name: game.i18n.localize("RNCS.settings.AllowedDistributionMethods.Name"),
+        hint: game.i18n.localize("RNCS.settings.AllowedDistributionMethods.Hint"),
+        scope: "world",
+        config: false,
+        type: String,
+        default: JSON.stringify(["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"])
+    });
+
     game.settings.register(settingsKey, "DistributionMethod", {
         name: game.i18n.localize("RNCS.settings.DistributionMethod.Name"),
         hint: game.i18n.localize("RNCS.settings.DistributionMethod.Hint"),
-        scope: "world",
+        scope: "client",
         config: false,
         type: String,
         choices: {
@@ -481,6 +490,18 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
     };
 
     async _prepareContext(options) {
+        const allowedRaw = game.settings.get(settingsKey, "AllowedDistributionMethods");
+        let allowedMethods = [];
+        try { allowedMethods = JSON.parse(allowedRaw); } catch(e) { allowedMethods = []; }
+
+        // Build checklist state for each method
+        const DistributionMethod_checklist = Object.entries(this.DistributionMethod_choices).map(([key, label]) => ({
+            key,
+            label,
+            checked: allowedMethods.includes(key),
+            description: game.i18n.localize("RNCS.results-text.note-from-dm." + key)
+        }));
+
         return {
             AbilitiesRollMethod_choices: this.AbilitiesRollMethod_choices,
             AbilitiesRollMethod_value: game.settings.get(settingsKey, "AbilitiesRollMethod"),
@@ -494,14 +515,20 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
             Over18Allowed_value: game.settings.get(settingsKey, "Over18Allowed"),
             MinimumAbilityTotal_value: game.settings.get(settingsKey, "MinimumAbilityTotal"),
             MaximumAbilityTotal_value: game.settings.get(settingsKey, "MaximumAbilityTotal"),
-            DistributionMethod_choices: this.DistributionMethod_choices,
-            DistributionMethod_value: game.settings.get(settingsKey, "DistributionMethod")
+            DistributionMethod_checklist: DistributionMethod_checklist
         }
     }
 
     static async _onSubmit(event, form, formData) {
         if (event.submitter?.id !== "cancel") {
             const data = formData.object;
+
+            // Collect allowed distribution methods from checkboxes
+            const allMethods = ["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"];
+            const allowedMethods = allMethods.filter(m => data["rncs_AllowedMethod_" + m] === true);
+            // Ensure at least one method is allowed
+            const methodsToSave = allowedMethods.length > 0 ? allowedMethods : ["apply-as-rolled"];
+
             game.settings.set(settingsKey, "AbilitiesRollMethod", data.rncs_AbilitiesRollMethod),
             game.settings.set(settingsKey, "DropLowestDieRoll", data.rncs_DropLowestDieRoll),
             game.settings.set(settingsKey, "ReRollOnes", data.rncs_ReRollOnes),
@@ -511,7 +538,7 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
             game.settings.set(settingsKey, "Over18Allowed", data.rncs_Over18Allowed),
             game.settings.set(settingsKey, "MinimumAbilityTotal", data.rncs_MinimumAbilityTotal),
             game.settings.set(settingsKey, "MaximumAbilityTotal", data.rncs_MaximumAbilityTotal),
-            game.settings.set(settingsKey, "DistributionMethod", data.rncs_DistributionMethod)
+            game.settings.set(settingsKey, "AllowedDistributionMethods", JSON.stringify(methodsToSave))
         }
     }
 

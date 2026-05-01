@@ -1,4 +1,4 @@
-import { registerSettings } from "./settings.js";
+import { registerSettings, settingsKey } from "./settings.js";
 import { RegisteredSettings } from "./registered-settings.js";
 import { DiceRoller } from './dice-roller.js';
 //import { Controls } from './controls.js';
@@ -201,36 +201,94 @@ export async function RollStats() {
 	// Roll them dice!
 	const _settings = new RegisteredSettings;
 	let dice_roller = new DiceRoller();
-	let title = '';
-	let question = '';
-	if(_settings.DistributionMethod !== "point-buy-method"){
-		title = game.i18n.localize("RNCS.dialog.confirm-roll.Title")
-		question = game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
-	}else{
-		title = game.i18n.localize("RNCS.dialog.point-buy.Title")
-		question = game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
+
+	// Determine which distribution methods are allowed by the GM
+	let allowedMethods = _settings.AllowedDistributionMethods;
+	if (!Array.isArray(allowedMethods) || allowedMethods.length === 0) {
+		allowedMethods = ["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"];
 	}
 
-	const confirmed = await foundry.applications.api.DialogV2.confirm({
+	// Distribution method labels for the dropdown
+	const methodLabels = {
+		"apply-as-rolled":   game.i18n.localize("RNCS.settings.DistributionMethod.choices.apply-as-rolled"),
+		"distribute-freely": game.i18n.localize("RNCS.settings.DistributionMethod.choices.distribute-freely"),
+		"ring-method":       game.i18n.localize("RNCS.settings.DistributionMethod.choices.ring-method"),
+		"point-buy-method":  game.i18n.localize("RNCS.settings.DistributionMethod.choices.point-buy-method")
+	};
+
+	// Resolve the player's current preference, defaulting to the first allowed method
+	let currentMethod = _settings.DistributionMethod;
+	if (!allowedMethods.includes(currentMethod)) { currentMethod = allowedMethods[0]; }
+
+	// Build the confirm dialog content, including a method dropdown when multiple methods are allowed
+	let methodSelectHtml = "";
+	if (allowedMethods.length > 1) {
+		const options = allowedMethods.map(m =>
+			`<option value="${m}"${m === currentMethod ? " selected" : ""}>${methodLabels[m]}</option>`
+		).join("");
+		methodSelectHtml = `<div style="margin-top:6px;"><label style="font-weight:600;">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label><select name="rncs_method" style="height:1.8em;">${options}</select></div>`;
+	}
+
+	// Temporarily set the distribution method so GetMethodText() reflects the current choice.
+	// We re-read it after the dialog is confirmed.
+	await game.settings.set(settingsKey, "DistributionMethod", currentMethod);
+	dice_roller = new DiceRoller();
+
+	const isPointBuy = (currentMethod === "point-buy-method");
+	let title = isPointBuy
+		? game.i18n.localize("RNCS.dialog.point-buy.Title")
+		: game.i18n.localize("RNCS.dialog.confirm-roll.Title");
+	let question = isPointBuy
+		? game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
+		: game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
+
+	const dialogContent = `<small>${dice_roller.GetMethodText()}<p>${question}</p>${methodSelectHtml}</small>`;
+
+	// Use DialogV2.wait so we can read the method dropdown value on confirm
+	const result = await foundry.applications.api.DialogV2.wait({
 		window: { title: title },
-		content: "<small>" + dice_roller.GetMethodText() + "<p>" + question + "</p></small>",
+		content: dialogContent,
+		buttons: [
+			{
+				action: "confirm",
+				label: game.i18n.localize("Yes"),
+				icon: "fa fa-check",
+				callback: (event, button) => {
+					const sel = button.form?.elements?.rncs_method;
+					return sel ? sel.value : currentMethod;
+				}
+			},
+			{
+				action: "cancel",
+				label: game.i18n.localize("No"),
+				icon: "fa fa-times",
+				default: true,
+				callback: () => null
+			}
+		],
 		rejectClose: false
 	});
 
-	if (confirmed) {
-		for (let _actor = 0; _actor < dice_roller._settingNumberOfActors(); _actor += 1) {
+	if (!result) return; // cancelled or closed
 
-			// Roll abilities
-			dice_roller = new DiceRoller()
-			await dice_roller.RollThemDice();
+	// Persist the player's chosen distribution method
+	const chosenMethod = allowedMethods.includes(result) ? result : currentMethod;
+	await game.settings.set(settingsKey, "DistributionMethod", chosenMethod);
 
-			// Show results
-			if (_settings.DiceSoNiceEnabled) {
-				let data = { throws: [{ dice: dice_roller._roll_data }] };
-				await game.dice3d?.show(data)
-			}
-			ShowResultsInChatMessage(dice_roller);
+	const confirmedSettings = new RegisteredSettings;
+
+	for (let _actor = 0; _actor < new DiceRoller()._settingNumberOfActors(); _actor += 1) {
+
+		// Roll abilities
+		dice_roller = new DiceRoller()
+		await dice_roller.RollThemDice();
+
+		// Show results
+		if (confirmedSettings.DiceSoNiceEnabled) {
+			let data = { throws: [{ dice: dice_roller._roll_data }] };
+			await game.dice3d?.show(data)
 		}
+		ShowResultsInChatMessage(dice_roller);
 	}
 }
 

@@ -166,6 +166,20 @@
         }
 
         // Increment or Decrement ability with Bonus Points
+        // For point-buy-method, uses 5e PHB scaling: scores 8-13 cost 1 pt each,
+        // 14 costs 2 pts extra (7 total), 15 costs 2 pts extra (9 total). Max score is 15.
+        function getPointBuyCost(currentScore) {
+            if (currentScore >= 15) return Infinity; // already at max
+            if (currentScore >= 13) return 2;        // 13→14 or 14→15 costs 2 points
+            return 1;                                // 8→13 costs 1 point per step
+        }
+
+        function getPointBuyRefund(currentScore) {
+            if (currentScore <= 8) return 0;   // already at minimum
+            if (currentScore > 13) return 2;   // decreasing from 14 or 15 refunds 2 points
+            return 1;
+        }
+
         function BPchange(ev) {
             const bp_button = document.getElementById(ev.target.id);
             const bp_points = bp_button.parentElement.querySelector(".rncs-bp");
@@ -173,17 +187,24 @@
             const bp_max = parseInt(span_bp_max.innerText);
             let bp_remaining = parseInt(span_bp_remaining.innerText);
 
+            const isPointBuy = ability_scores.dataset.distributionmethod === "point-buy-method";
+
             if (bp_button.id.includes("minus") && bp_points_value > 0) {
 
+                // In point-buy mode, refund the scaled cost of the last increment
+                const refund = isPointBuy ? getPointBuyRefund(8 + bp_points_value) : 1;
                 bp_points.innerText = Math.max(0, bp_points_value - 1);
-                bp_remaining = (bp_remaining < bp_max ? bp_remaining + 1 : bp_max);
+                bp_remaining = Math.min(bp_remaining + refund, bp_max);
                 span_bp_remaining.innerText = bp_remaining;
 
             } else if (bp_button.id.includes("plus")) {
 
-                bp_points.innerText = (bp_remaining > 0 ? bp_points_value + 1 : bp_points.innerText);
-                bp_remaining = (bp_remaining > 0 ? bp_remaining - 1 : 0);
-                span_bp_remaining.innerText = bp_remaining;
+                const cost = isPointBuy ? getPointBuyCost(8 + bp_points_value) : 1;
+                if (cost !== Infinity && bp_remaining >= cost) {
+                    bp_points.innerText = bp_points_value + 1;
+                    bp_remaining -= cost;
+                    span_bp_remaining.innerText = bp_remaining;
+                }
             }
             RecalcFinalScores();
         }

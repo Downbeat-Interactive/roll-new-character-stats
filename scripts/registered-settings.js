@@ -21,6 +21,7 @@ export class RegisteredSettings{
     Over18Allowed = game.settings.get(settingsKey, "Over18Allowed");
     MinimumAbilityTotal = game.settings.get(settingsKey, "MinimumAbilityTotal");
     MaximumAbilityTotal = game.settings.get(settingsKey, "MaximumAbilityTotal");
+    AllowedDistributionMethods = (() => { try { return JSON.parse(game.settings.get(settingsKey, "AllowedDistributionMethods") || "[]"); } catch(e) { return []; } })();
     DistributionMethod = game.settings.get(settingsKey, "DistributionMethod");
 
     ChatRemoveConfigureActorButton = game.settings.get(settingsKey, "ChatRemoveConfigureActorButton");
