@@ -41,7 +41,7 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
 
     static DEFAULT_OPTIONS = {
         id: "configure-actor",
-        window: { title: game.i18n.localize("RNCS.dialog.results-button.configure-new-actor") },
+        window: { title: "RNCS.dialog.results-button.configure-new-actor" },
         form: { handler: ConfigureActor._onSubmit, closeOnSubmit: true },
         position: { height: 610, width: 375 }
     };
