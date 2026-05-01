@@ -22,6 +22,7 @@ Hooks.once("init", () => {
 	Handlebars.registerHelper("if_AorB", function (a, b, options) {
 		if (a || b) { return options.fn(this); } else { options.inverse(this); }
 	});
+	document.addEventListener("change", OnMethodSelectChange);
 	console.log(RNCS.ID + " | Initialized")
 
 });
@@ -132,6 +133,11 @@ function UpdateMethodDescription(select) {
 	wrapper.querySelectorAll(".rncs-method-description").forEach(description => {
 		description.classList.toggle("rncs-display-none", description.dataset.method !== select.value);
 	});
+}
+
+function OnMethodSelectChange(event) {
+	const select = event.target?.closest?.(".rncs-method-select select[name='rncs_method']");
+	if (select) UpdateMethodDescription(select);
 }
 
 export class RNCS {
@@ -247,51 +253,32 @@ export async function RollStats() {
 		? game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
 		: game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
 
-	const methodPickerId = "rncs-method-picker-" + Date.now().toString(36) + Math.random().toString(36).slice(2);
-	const dialogContent = `<small><div class="rncs-method-picker" data-rncs-method-picker-id="${methodPickerId}">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
-
-	const onRenderDialog = (app, html) => {
-		const root = html instanceof HTMLElement ? html : html?.[0];
-		const picker = root?.querySelector?.(`.rncs-method-picker[data-rncs-method-picker-id="${methodPickerId}"]`);
-		if (!picker) return;
-
-		const select = picker.querySelector("select[name='rncs_method']");
-		if (select && select.dataset.rncsDescriptionListener !== "true") {
-			select.dataset.rncsDescriptionListener = "true";
-			select.addEventListener("change", () => UpdateMethodDescription(select));
-		}
-	};
-	Hooks.on("renderDialogV2", onRenderDialog);
+	const dialogContent = `<small><div class="rncs-method-picker">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
 
 	// Use DialogV2.wait so we can read the method dropdown value on confirm
-	let result = null;
-	try {
-		result = await foundry.applications.api.DialogV2.wait({
-			window: { title: title },
-			content: dialogContent,
-			buttons: [
-				{
-					action: "confirm",
-					label: game.i18n.localize("Yes"),
-					icon: "fa fa-check",
-					callback: (event, button) => {
-						const sel = button.form?.elements?.rncs_method;
-						return sel ? sel.value : currentMethod;
-					}
-				},
-				{
-					action: "cancel",
-					label: game.i18n.localize("No"),
-					icon: "fa fa-times",
-					default: true,
-					callback: () => null
+	const result = await foundry.applications.api.DialogV2.wait({
+		window: { title: title },
+		content: dialogContent,
+		buttons: [
+			{
+				action: "confirm",
+				label: game.i18n.localize("Yes"),
+				icon: "fa fa-check",
+				callback: (event, button) => {
+					const sel = button.form?.elements?.rncs_method;
+					return sel ? sel.value : currentMethod;
 				}
-			],
-			rejectClose: false
-		});
-	} finally {
-		Hooks.off("renderDialogV2", onRenderDialog);
-	}
+			},
+			{
+				action: "cancel",
+				label: game.i18n.localize("No"),
+				icon: "fa fa-times",
+				default: true,
+				callback: () => null
+			}
+		],
+		rejectClose: false
+	});
 
 	if (!result) return; // cancelled or closed
 
