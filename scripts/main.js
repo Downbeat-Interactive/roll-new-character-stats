@@ -20,7 +20,7 @@ Hooks.once("init", () => {
 	// I know there is a more robust option out there for handlebars logic, 
 	// but this will suffice for the only spot I need OR logic at the moment
 	Handlebars.registerHelper("if_AorB", function (a, b, options) {
-		if (a || b) { return options.fn(this); } else { options.inverse(this); }
+		if (a || b) { return options.fn(this); } else { return options.inverse(this); }
 	});
 	document.addEventListener("change", OnMethodSelectChange);
 	console.log(RNCS.ID + " | Initialized")
@@ -136,8 +136,11 @@ function UpdateMethodDescription(select) {
 }
 
 function OnMethodSelectChange(event) {
+	if (!(event.target instanceof Element)) return;
 	const select = event.target?.closest?.(".rncs-method-select select[name='rncs_method']");
-	if (select) UpdateMethodDescription(select);
+	if (!select?.closest(".rncs-method-picker")) return;
+
+	UpdateMethodDescription(select);
 }
 
 export class RNCS {
