@@ -118,6 +118,10 @@ function HideAbilityModifierColumn() {
     HideColumn(".rncs-modifier-header", ".rncs-modifier");
 }
 
+function UsesDnd5e2024Ruleset(settings) {
+    return game.system.id === "dnd5e" && settings.DnD5eRuleset === DND5E_2024_RULESET;
+}
+
 function HideColumn(table_header_class, table_data_class) {
     const ability_scores = document.getElementById("ability_scores");
     if (!ability_scores) return;
@@ -650,7 +654,7 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
             individual_rolls: this.individual_rolls.map(x => x.result),
             Over18Allowed: this.Over18Allowed,
             DistributionMethod: this.DistributionMethod,
-            hide_racial_bonus: game.system.id === "dnd5e" && this._settings.DnD5eRuleset === DND5E_2024_RULESET,
+            hide_racial_bonus: UsesDnd5e2024Ruleset(this._settings),
             HideResultsZone: this.HideResultsZone,
 
             // BEGIN Common Character data
@@ -705,7 +709,7 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
 
         const owner = this.owner_id;
         const data = formData.object;
-        const effectiveRaceName = game.system.id === "dnd5e" && this._settings.DnD5eRuleset === DND5E_2024_RULESET ? "" : data.select_race;
+        const effectiveRaceName = UsesDnd5e2024Ruleset(this._settings) ? "" : data.select_race;
         let actor = await Actor.create({
             name: ((data.character_name === "New Actor" || data.character_name === "") && effectiveRaceName ? effectiveRaceName : data.character_name),
             permission: { [owner]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
