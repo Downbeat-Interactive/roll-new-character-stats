@@ -5,7 +5,7 @@
         let individual_rolls_remaining = null;
         let ring_start = 0;
 
-        function Intitialize() {
+        function Initialize() {
 
             // Apply as Rolled?
             const ability_scores = document.getElementById("ability_scores");
@@ -133,31 +133,32 @@
 
         function RegisterRingWheelHandler() {
             const individual_rolls_table = document.getElementById("individual_rolls_table");
-            if (!individual_rolls_table || individual_rolls_table.dataset.wheelHandlerRegistered === "true") return;
-            individual_rolls_table.dataset.wheelHandlerRegistered = "true";
-            individual_rolls_table.addEventListener("wheel", function (e) {
+            if (!individual_rolls_table) return;
+            individual_rolls_table.removeEventListener("wheel", ringWheelHandler);
+            individual_rolls_table.addEventListener("wheel", ringWheelHandler);
+        }
 
-                const ring_reverse = game.settings.get("roll-new-character-stats", "ReverseRingMethodScrolling");
-                // TODO: Simplify
-                if (e.deltaY > 0) {
-                    if(!ring_reverse){
-                        ring_start = (ring_start + 1 === individual_rolls_remaining.rolls.length ? 0 : ring_start + 1)%individual_rolls_remaining.rolls.length;
-                    }else{
-                        ring_start = (ring_start - 1 === -1 ? individual_rolls_remaining.rolls.length - 1 : ring_start - 1)%individual_rolls_remaining.rolls.length;
-                    }
+        function ringWheelHandler(e) {
+            const ring_reverse = game.settings.get("roll-new-character-stats", "ReverseRingMethodScrolling");
+            // TODO: Simplify
+            if (e.deltaY > 0) {
+                if (!ring_reverse) {
+                    ring_start = (ring_start + 1 === individual_rolls_remaining.rolls.length ? 0 : ring_start + 1)%individual_rolls_remaining.rolls.length;
+                } else {
+                    ring_start = (ring_start - 1 === -1 ? individual_rolls_remaining.rolls.length - 1 : ring_start - 1)%individual_rolls_remaining.rolls.length;
                 }
-                else {
-                    if(!ring_reverse){
-                        ring_start = (ring_start - 1 === -1 ? individual_rolls_remaining.rolls.length - 1 : ring_start - 1)%individual_rolls_remaining.rolls.length;
-                    }else{
-                        ring_start = (ring_start + 1 === individual_rolls_remaining.rolls.length ? 0 : ring_start + 1)%individual_rolls_remaining.rolls.length;
-                    }
+            }
+            else {
+                if (!ring_reverse) {
+                    ring_start = (ring_start - 1 === -1 ? individual_rolls_remaining.rolls.length - 1 : ring_start - 1)%individual_rolls_remaining.rolls.length;
+                } else {
+                    ring_start = (ring_start + 1 === individual_rolls_remaining.rolls.length ? 0 : ring_start + 1)%individual_rolls_remaining.rolls.length;
                 }
+            }
 
-                FillRingItemAdders();
-                GetSelectedRingTotal();
-                HighlightIndividualRolls(false);
-            });
+            FillRingItemAdders();
+            GetSelectedRingTotal();
+            HighlightIndividualRolls(false);
         }
 
         function drop_handler(ev) {
@@ -526,7 +527,8 @@
             }
         }
 
-        window.Intitialize = Intitialize;
+        window.Initialize = Initialize;
+        window.Intitialize = Initialize;
         window.MoveResult = MoveResult;
         window.BPchange = BPchange;
         window.UpdateRaceBonus = UpdateRaceBonus;
@@ -534,7 +536,7 @@
         window.drop_handler = drop_handler;
         window.dragover_handler = dragover_handler;
 
-        Intitialize();
+        Initialize();
     </script>
 
     <div style="margin-bottom:5px;">
