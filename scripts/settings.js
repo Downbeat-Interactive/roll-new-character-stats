@@ -483,7 +483,7 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
 
     static DEFAULT_OPTIONS = {
         id: "rncs-roll-dist-method",
-        window: { title: "RNCS.settings.RollMethodAndDistribution.Name" },
+        window: { title: "RNCS - Roll Method & Distribution" },
         form: { handler: RollAndDistributionMethodSettings._onSubmit, closeOnSubmit: true },
         position: { width: 500 }
     };
