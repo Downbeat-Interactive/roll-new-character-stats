@@ -237,6 +237,10 @@
     margin-top: 6px;
   }
 
+  .rncs-method-label {
+    font-weight: 600;
+  }
+
   .rncs-method-description-list {
     display: block;
     margin-top: 6px;
