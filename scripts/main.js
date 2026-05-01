@@ -125,6 +125,15 @@ async function VersionUpdateValidation() {
 	}
 }
 
+window.RNCSUpdateMethodDescription = function (select) {
+	const wrapper = select.closest(".rncs-method-picker");
+	if (!wrapper) return;
+
+	wrapper.querySelectorAll(".rncs-method-description").forEach(description => {
+		description.classList.toggle("rncs-display-none", description.dataset.method !== select.value);
+	});
+}
+
 export class RNCS {
 	static ID = 'roll-new-character-stats';
 
@@ -215,14 +224,20 @@ export async function RollStats() {
 			const label = game.i18n.localize("RNCS.settings.DistributionMethod.choices." + m);
 			return `<option value="${m}"${m === currentMethod ? " selected" : ""}>${label}</option>`;
 		}).join("");
-		methodSelectHtml = `<div style="margin-top:6px;"><label style="font-weight:600;">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label><select name="rncs_method" style="height:1.8em;">${options}</select></div>`;
+		methodSelectHtml = `<div class="rncs-method-select"><label style="font-weight:600;">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label><select name="rncs_method" class="rncs-select" onchange="RNCSUpdateMethodDescription(this)">${options}</select></div>`;
+	} else {
+		const label = game.i18n.localize("RNCS.settings.DistributionMethod.choices." + currentMethod);
+		methodSelectHtml = `<div class="rncs-method-select"><label style="font-weight:600;">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label>${label}</div>`;
 	}
 
-	// Build dialog method text using currentMethod without a permanent settings write.
-	// Temporarily override _settings on a throwaway DiceRoller instance so GetMethodText()
-	// reflects the current/default choice before the player makes their selection.
-	let dice_roller = new DiceRoller();
-	dice_roller._settings.DistributionMethod = currentMethod;
+	const methodDescriptionsHtml = allowedMethods.map(method => {
+		// Build dialog method text using each selectable method without a permanent settings write.
+		// Temporarily override _settings on a throwaway DiceRoller instance so GetMethodText()
+		// can be swapped immediately when the player changes the dropdown.
+		let dice_roller = new DiceRoller();
+		dice_roller._settings.DistributionMethod = method;
+		return `<div class="rncs-method-description${method === currentMethod ? "" : " rncs-display-none"}" data-method="${method}">${dice_roller.GetMethodText()}</div>`;
+	}).join("");
 
 	const isPointBuy = (currentMethod === "point-buy-method");
 	let title = isPointBuy
@@ -232,7 +247,7 @@ export async function RollStats() {
 		? game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
 		: game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
 
-	const dialogContent = `<small>${dice_roller.GetMethodText()}<p>${question}</p>${methodSelectHtml}</small>`;
+	const dialogContent = `<small><div class="rncs-method-picker">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
 
 	// Use DialogV2.wait so we can read the method dropdown value on confirm
 	const result = await foundry.applications.api.DialogV2.wait({

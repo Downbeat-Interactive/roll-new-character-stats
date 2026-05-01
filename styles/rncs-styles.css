@@ -233,6 +233,15 @@
     flex: 1 !important;
   }
 
+  .rncs-method-select {
+    margin-top: 6px;
+  }
+
+  .rncs-method-description-list {
+    display: block;
+    margin-top: 6px;
+  }
+
   .rncs-settings-form h2 {
     margin: 0 0 10px;
     font-size: 1.2em;
