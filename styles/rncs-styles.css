@@ -118,13 +118,13 @@
   }
 
   .rncs-input {
-    color: #fff;
+    color: #f0f0f0;
   }
 
   .rncs-select,
   .rncs-select option {
     background: #fff;
-    color: #111;
+    color: #000;
   }
 
   .rncs-div-label {
