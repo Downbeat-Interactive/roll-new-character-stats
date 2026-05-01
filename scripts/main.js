@@ -1,4 +1,4 @@
-import { registerSettings } from "./settings.js";
+import { registerSettings, settingsKey, ALL_DISTRIBUTION_METHODS } from "./settings.js";
 import { RegisteredSettings } from "./registered-settings.js";
 import { DiceRoller } from './dice-roller.js';
 //import { Controls } from './controls.js';
@@ -20,7 +20,7 @@ Hooks.once("init", () => {
 	// I know there is a more robust option out there for handlebars logic, 
 	// but this will suffice for the only spot I need OR logic at the moment
 	Handlebars.registerHelper("if_AorB", function (a, b, options) {
-		if (a || b) { return options.fn(this); } else { options.inverse(this); }
+		if (a || b) { return options.fn(this); } else { return options.inverse(this); }
 	});
 	console.log(RNCS.ID + " | Initialized")
 
@@ -46,23 +46,20 @@ async function onRenderActorDirectory(app, html) {
 	});
 }
 
-Hooks.on("renderChatMessageHTML", (app, html) => {
-	// Find buttons with class "rncs-configure-new-actor"
+Hooks.on("renderChatMessageHTML", (chatMessage, html) => {
+	// Hide the configure button if the user cannot create actors
 	const buttons = html.querySelectorAll(".rncs-configure-new-actor");
 	if (!game.user.can("ACTOR_CREATE")) {
 		buttons.forEach(button => {
 			button.classList.add("rncs-display-none");
 		});
 	}
-});
 
-Hooks.on("renderChatMessage", (chatMessage, html) => {
-	// Check if the message is from RNCS
+	// Attach click listener to the Configure Actor button for RNCS messages
 	if (chatMessage.flags?.roll_new_character_stats) {
-		// Find the Configure Actor button
 		const configureButton = html.querySelector(".rncs-configure-new-actor button[data-action='configure_new_actor']");
 		configureButton?.addEventListener("click", (event) => {
-			event.preventDefault(); // Prevent default behavior
+			event.preventDefault();
 			const msgId = chatMessage.id;
 			const flags = chatMessage.flags.roll_new_character_stats;
 
@@ -200,37 +197,85 @@ export async function RollStats() {
 
 	// Roll them dice!
 	const _settings = new RegisteredSettings;
-	let dice_roller = new DiceRoller();
-	let title = '';
-	let question = '';
-	if(_settings.DistributionMethod !== "point-buy-method"){
-		title = game.i18n.localize("RNCS.dialog.confirm-roll.Title")
-		question = game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
-	}else{
-		title = game.i18n.localize("RNCS.dialog.point-buy.Title")
-		question = game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
+
+	// Determine which distribution methods are allowed by the GM
+	let allowedMethods = _settings.AllowedDistributionMethods;
+	if (!Array.isArray(allowedMethods) || allowedMethods.length === 0) {
+		allowedMethods = ALL_DISTRIBUTION_METHODS;
 	}
 
-	const confirmed = await foundry.applications.api.DialogV2.confirm({
+	// Resolve the player's current preference, defaulting to the first allowed method
+	let currentMethod = _settings.DistributionMethod;
+	if (!allowedMethods.includes(currentMethod)) { currentMethod = allowedMethods[0]; }
+
+	// Build method dropdown HTML for the dialog (shown only when multiple methods are allowed)
+	let methodSelectHtml = "";
+	if (allowedMethods.length > 1) {
+		const options = allowedMethods.map(m => {
+			const label = game.i18n.localize("RNCS.settings.DistributionMethod.choices." + m);
+			return `<option value="${m}"${m === currentMethod ? " selected" : ""}>${label}</option>`;
+		}).join("");
+		methodSelectHtml = `<div class="rncs-method-select"><label class="rncs-method-label">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label><select name="rncs_method" class="rncs-select">${options}</select></div>`;
+	} else {
+		const label = game.i18n.localize("RNCS.settings.DistributionMethod.choices." + currentMethod);
+		methodSelectHtml = `<div class="rncs-method-select"><label class="rncs-method-label">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label>${label}</div>`;
+	}
+
+	const isPointBuy = (currentMethod === "point-buy-method");
+	let title = isPointBuy
+		? game.i18n.localize("RNCS.dialog.point-buy.Title")
+		: game.i18n.localize("RNCS.dialog.confirm-roll.Title");
+	let question = isPointBuy
+		? game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
+		: game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
+
+	const dialogContent = `<small>${methodSelectHtml}<p>${question}</p></small>`;
+
+	// Use DialogV2.wait so we can read the method dropdown value on confirm
+	const result = await foundry.applications.api.DialogV2.wait({
 		window: { title: title },
-		content: "<small>" + dice_roller.GetMethodText() + "<p>" + question + "</p></small>",
+		content: dialogContent,
+		buttons: [
+			{
+				action: "confirm",
+				label: game.i18n.localize("Yes"),
+				icon: "fa fa-check",
+				callback: (event, button) => {
+					const sel = button.form?.elements?.rncs_method;
+					return sel ? sel.value : currentMethod;
+				}
+			},
+			{
+				action: "cancel",
+				label: game.i18n.localize("No"),
+				icon: "fa fa-times",
+				default: true,
+				callback: () => null
+			}
+		],
 		rejectClose: false
 	});
 
-	if (confirmed) {
-		for (let _actor = 0; _actor < dice_roller._settingNumberOfActors(); _actor += 1) {
+	if (!result) return; // cancelled or closed
 
-			// Roll abilities
-			dice_roller = new DiceRoller()
-			await dice_roller.RollThemDice();
+	// Persist the player's chosen distribution method only after confirmation
+	const chosenMethod = allowedMethods.includes(result) ? result : currentMethod;
+	await game.settings.set(settingsKey, "DistributionMethod", chosenMethod);
 
-			// Show results
-			if (_settings.DiceSoNiceEnabled) {
-				let data = { throws: [{ dice: dice_roller._roll_data }] };
-				await game.dice3d?.show(data)
-			}
-			ShowResultsInChatMessage(dice_roller);
+	const confirmedSettings = new RegisteredSettings;
+
+	for (let _actor = 0; _actor < new DiceRoller()._settingNumberOfActors(); _actor += 1) {
+
+		// Roll abilities
+		let dice_roller = new DiceRoller()
+		await dice_roller.RollThemDice();
+
+		// Show results
+		if (confirmedSettings.DiceSoNiceEnabled) {
+			let data = { throws: [{ dice: dice_roller._roll_data }] };
+			await game.dice3d?.show(data)
 		}
+		ShowResultsInChatMessage(dice_roller);
 	}
 }
 

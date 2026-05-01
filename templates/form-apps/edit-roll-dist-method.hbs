@@ -9,7 +9,7 @@
         <div>Over18Allowed_value :{{Over18Allowed_value}}</div>
         <div>MinimumAbilityTotal_value :{{MinimumAbilityTotal_value}}</div>
         <div>MaximumAbilityTotal_value :{{MaximumAbilityTotal_value}}</div>
-        <div>DistributionMethod_value :{{DistributionMethod_value}}</div>
+        <div>DistributionMethod_checklist :{{DistributionMethod_checklist}}</div>
     </div>
     <div class="rncs-settings-grid">
         <div class="rncs-settings-column">
@@ -108,36 +108,24 @@
                 </div>
             </div>
 
-            {{!-- DistributionMethod --}}
+            {{!-- AllowedDistributionMethods (checklist) --}}
             <div id="rncs_DistributionMethod" class="rncs-form-group">
-                <label><span>{{localize "RNCS.settings.DistributionMethod.Name"}}</span></label>
-                <p class="notes">{{localize "RNCS.settings.DistributionMethod.Hint"}}</p>
+                <label><span>{{localize "RNCS.settings.AllowedDistributionMethods.Name"}}</span></label>
+                <p class="notes">{{localize "RNCS.settings.AllowedDistributionMethods.Hint"}}</p>
                 <div class="rncs-form-group-indent">
-                    <div>
-                        <label><span>>&nbsp;{{localize
-                            "RNCS.settings.DistributionMethod.choices.apply-as-rolled"}}</span></label>
-                        <div class="notes">{{localize "RNCS.results-text.note-from-dm.apply-as-rolled"}}</div>
+                    {{#each DistributionMethod_checklist as |item id|}}
+                    <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:4px;">
+                        <input type="checkbox"
+                            id="rncs_AllowedMethod_{{item.key}}"
+                            name="rncs_AllowedMethod_{{item.key}}"
+                            data-dtype="Boolean"
+                            {{checked item.checked}}>
+                        <label for="rncs_AllowedMethod_{{item.key}}" style="font-weight:600;">
+                            {{item.label}}
+                        </label>
                     </div>
-                    <div>
-                        <label><span>>&nbsp;{{localize
-                            "RNCS.settings.DistributionMethod.choices.distribute-freely"}}</span></label>
-                        <div class="notes">{{localize "RNCS.results-text.note-from-dm.distribute-freely"}}</div>
-                    </div>
-                    <div>
-                        <label><span>>&nbsp;{{localize
-                            "RNCS.settings.DistributionMethod.choices.ring-method"}}</span></label>
-                        <div class="notes">{{localize "RNCS.results-text.note-from-dm.ring-method"}}</div>
-                    </div>
-                    <div>
-                        <label><span>>&nbsp;{{localize
-                            "RNCS.settings.DistributionMethod.choices.point-buy-method"}}</span></label>
-                        <div class="notes">{{localize "RNCS.results-text.note-from-dm.point-buy-method"}}</div>
-                    </div>
-                </div>
-                <div class="rncs-form-fields">
-                    <select name="rncs_DistributionMethod" class="rncs-select">
-                        {{selectOptions DistributionMethod_choices selected=DistributionMethod_value localized=true}}
-                    </select>
+                    <div class="notes" style="margin-bottom:6px; padding-left:1.6em;">{{item.description}}</div>
+                    {{/each}}
                 </div>
             </div>
         </div>

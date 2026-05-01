@@ -103,7 +103,7 @@
     background: rgba(0, 0, 0, 0.05);
     padding: 1px 3px;
     margin: 0;
-    color: var(--color-text-dark-primary);
+    color: var(--color-text-light-primary, #fff);
     font-family: inherit;
     font-size: inherit;
     text-align: inherit;
@@ -115,6 +115,16 @@
 
   .rncs-select {
     width: 100%;
+  }
+
+  .rncs-input {
+    color: #f0f0f0;
+  }
+
+  .rncs-select,
+  .rncs-select option {
+    background: #fff;
+    color: #000;
   }
 
   .rncs-div-label {
@@ -231,6 +241,14 @@
     font-size: smaller;
     padding-left: 10px !important;
     flex: 1 !important;
+  }
+
+  .rncs-method-select {
+    margin-top: 6px;
+  }
+
+  .rncs-method-label {
+    font-weight: 600;
   }
 
   .rncs-settings-form h2 {

@@ -115,6 +115,10 @@
         "Name": "Distribute Results",
         "Hint": "Allow distribution of results freely."      
       },
+      "AllowedDistributionMethods": {
+        "Name": "Allowed Distribution Methods",
+        "Hint": "Check each distribution method players are allowed to choose when rolling new character stats. At least one method must be selected."
+      },
       "DistributionMethod": {
         "Name": "Distribution Method",
         "Hint": "Choose how results will be distributed.",
@@ -207,7 +211,7 @@
         "apply-as-rolled": "Each result will be applied to abilities in the order they were rolled. ",
         "distribute-freely": "You may distribute these scores among your abilities as you desire. ",
         "ring-method": "You may select three consecutive die rolls and apply them to any ability. ",
-        "point-buy-method": "You may distribute 27 points among your abilities. ",
+        "point-buy-method": "You may distribute 27 points among your abilities. All abilities start at 8 (min). Scores 9–13 cost 1 point each; scores 14–15 cost 2 points each (max score 15). ",
         "distribute-bonus-points": "The Bonus Point(s) may be distributed among any of your scores. ",
         "final-scores-may": "Final scores may ",
         "final-scores-may-not": "Final scores may <b>not</b> ",
@@ -227,7 +231,7 @@
       },
       "point-buy":{
         "Title": "Begin New Character Stats",
-        "Content": "Begin new character with point buy method?"
+        "Content": "Begin new character with point buy method? All abilities start at 8; distribute 27 points (scores 14–15 cost 2 pts each, max 15)."
       }
     },
     "form-app":{
@@ -236,7 +240,7 @@
         "over-18-not-allowed": "* No scores over 18 allowed.",
         "accept-new-actor": "Accept New Actor",
         "ring-method": "Ring Method: This method allows you to select three consecutive die rolls and apply them to any ability.",
-        "point-buy-method": "Point Buy Method: You may distribute 27 points among your abilities. "
+        "point-buy-method": "Point Buy (5e): All abilities start at 8. Distribute 27 points — scores 9–13 cost 1 pt each; 14 costs 2 pts more (7 total); 15 costs 2 pts more (9 total). Maximum score is 15."
       }
     }
   }
