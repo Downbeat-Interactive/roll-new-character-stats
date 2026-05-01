@@ -49,6 +49,7 @@ jobs:
 
             - name: Get Module ID
               id: moduleID
+              if: ${{ secrets.FOUNDRY_KEY != '' }}
               uses: notiz-dev/github-action-json-property@release
               with:
                   path: "module.json"
@@ -56,6 +57,7 @@ jobs:
 
             - name: Get minimum compatibility
               id: minimum
+              if: ${{ secrets.FOUNDRY_KEY != '' }}
               uses: notiz-dev/github-action-json-property@release
               with:
                   path: "module.json"
@@ -63,12 +65,14 @@ jobs:
 
             - name: Get verified compatibility
               id: verified
+              if: ${{ secrets.FOUNDRY_KEY != '' }}
               uses: notiz-dev/github-action-json-property@release
               with:
                   path: "module.json"
                   prop_path: "compatibility.verified"
 
             - name: Publish to Foundry VTT package repository
+              if: ${{ secrets.FOUNDRY_KEY != '' }}
               uses: fjogeleit/http-request-action@v1
               with:
                   url: "https://api.foundryvtt.com/_api/packages/release_version"
