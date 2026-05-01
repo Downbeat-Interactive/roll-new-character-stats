@@ -704,9 +704,9 @@ export class ConfigureActor extends foundry.applications.api.HandlebarsApplicati
 
         const owner = this.owner_id;
         const data = formData.object;
-        const race_name = game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024" ? "" : data.select_race;
+        const raceName = game.system.id === "dnd5e" && this._settings.DnD5eRuleset === "2024" ? "" : data.select_race;
         let actor = await Actor.create({
-            name: ((data.character_name === "New Actor" || data.character_name === "") && race_name ? race_name : data.character_name),
+            name: ((data.character_name === "New Actor" || data.character_name === "") && raceName ? raceName : data.character_name),
             permission: { [owner]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
             type: game_system_helper.getSystemActorType(),
             img: "icons/svg/mystery-man.svg"
