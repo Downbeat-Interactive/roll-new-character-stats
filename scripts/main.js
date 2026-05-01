@@ -125,39 +125,6 @@ async function VersionUpdateValidation() {
 	}
 }
 
-function UpdateMethodDescription(select) {
-	const wrapper = select.closest(".rncs-method-picker");
-	if (!wrapper) return;
-
-	wrapper.querySelectorAll(".rncs-method-description").forEach(description => {
-		description.classList.toggle("rncs-display-none", description.dataset.method !== select.value);
-	});
-}
-
-function OnMethodSelectChange(event) {
-	if (!(event.target instanceof Element)) return;
-	const select = event.target?.closest?.(".rncs-method-select select[name='rncs_method']");
-	if (!select?.closest(".rncs-method-picker")) return;
-
-	UpdateMethodDescription(select);
-}
-
-let methodSelectListenerCount = 0;
-
-function RegisterMethodSelectListener() {
-	if (methodSelectListenerCount === 0) {
-		document.addEventListener("change", OnMethodSelectChange);
-	}
-	methodSelectListenerCount += 1;
-}
-
-function UnregisterMethodSelectListener() {
-	methodSelectListenerCount = Math.max(0, methodSelectListenerCount - 1);
-	if (methodSelectListenerCount === 0) {
-		document.removeEventListener("change", OnMethodSelectChange);
-	}
-}
-
 export class RNCS {
 	static ID = 'roll-new-character-stats';
 
@@ -254,15 +221,6 @@ export async function RollStats() {
 		methodSelectHtml = `<div class="rncs-method-select"><label class="rncs-method-label">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label>${label}</div>`;
 	}
 
-	const methodDescriptionsHtml = allowedMethods.map(method => {
-		// Build dialog method text using each selectable method without a permanent settings write.
-		// Temporarily override _settings on a throwaway DiceRoller instance so GetMethodText()
-		// can be swapped immediately when the player changes the dropdown.
-		let dice_roller = new DiceRoller();
-		dice_roller._settings.DistributionMethod = method;
-		return `<div class="rncs-method-description${method === currentMethod ? "" : " rncs-display-none"}" data-method="${method}">${dice_roller.GetMethodText()}</div>`;
-	}).join("");
-
 	const isPointBuy = (currentMethod === "point-buy-method");
 	let title = isPointBuy
 		? game.i18n.localize("RNCS.dialog.point-buy.Title")
@@ -271,38 +229,32 @@ export async function RollStats() {
 		? game.i18n.localize("RNCS.dialog.point-buy.Content").toString()
 		: game.i18n.localize("RNCS.dialog.confirm-roll.Content").toString().format(_settings.NumberOfActors, (_settings.NumberOfActors === 1 ? "character" : "characters"));
 
-	const dialogContent = `<small><div class="rncs-method-picker">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
+	const dialogContent = `<small>${methodSelectHtml}<p>${question}</p></small>`;
 
 	// Use DialogV2.wait so we can read the method dropdown value on confirm
-	RegisterMethodSelectListener();
-	let result = null;
-	try {
-		result = await foundry.applications.api.DialogV2.wait({
-			window: { title: title },
-			content: dialogContent,
-			buttons: [
-				{
-					action: "confirm",
-					label: game.i18n.localize("Yes"),
-					icon: "fa fa-check",
-					callback: (event, button) => {
-						const sel = button.form?.elements?.rncs_method;
-						return sel ? sel.value : currentMethod;
-					}
-				},
-				{
-					action: "cancel",
-					label: game.i18n.localize("No"),
-					icon: "fa fa-times",
-					default: true,
-					callback: () => null
+	const result = await foundry.applications.api.DialogV2.wait({
+		window: { title: title },
+		content: dialogContent,
+		buttons: [
+			{
+				action: "confirm",
+				label: game.i18n.localize("Yes"),
+				icon: "fa fa-check",
+				callback: (event, button) => {
+					const sel = button.form?.elements?.rncs_method;
+					return sel ? sel.value : currentMethod;
 				}
-			],
-			rejectClose: false
-		});
-	} finally {
-		UnregisterMethodSelectListener();
-	}
+			},
+			{
+				action: "cancel",
+				label: game.i18n.localize("No"),
+				icon: "fa fa-times",
+				default: true,
+				callback: () => null
+			}
+		],
+		rejectClose: false
+	});
 
 	if (!result) return; // cancelled or closed
 

@@ -117,6 +117,16 @@
     width: 100%;
   }
 
+  .rncs-input {
+    color: #fff;
+  }
+
+  .rncs-select,
+  .rncs-select option {
+    background: #fff;
+    color: #111;
+  }
+
   .rncs-div-label {
     width: 15%;
     display: inline-block;
@@ -239,11 +249,6 @@
 
   .rncs-method-label {
     font-weight: 600;
-  }
-
-  .rncs-method-description-list {
-    display: block;
-    margin-top: 6px;
   }
 
   .rncs-settings-form h2 {
