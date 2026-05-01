@@ -1,4 +1,4 @@
-import { registerSettings, settingsKey } from "./settings.js";
+import { registerSettings, settingsKey, ALL_DISTRIBUTION_METHODS } from "./settings.js";
 import { RegisteredSettings } from "./registered-settings.js";
 import { DiceRoller } from './dice-roller.js';
 //import { Controls } from './controls.js';
@@ -200,39 +200,32 @@ export async function RollStats() {
 
 	// Roll them dice!
 	const _settings = new RegisteredSettings;
-	let dice_roller = new DiceRoller();
 
 	// Determine which distribution methods are allowed by the GM
 	let allowedMethods = _settings.AllowedDistributionMethods;
 	if (!Array.isArray(allowedMethods) || allowedMethods.length === 0) {
-		allowedMethods = ["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"];
+		allowedMethods = ALL_DISTRIBUTION_METHODS;
 	}
-
-	// Distribution method labels for the dropdown
-	const methodLabels = {
-		"apply-as-rolled":   game.i18n.localize("RNCS.settings.DistributionMethod.choices.apply-as-rolled"),
-		"distribute-freely": game.i18n.localize("RNCS.settings.DistributionMethod.choices.distribute-freely"),
-		"ring-method":       game.i18n.localize("RNCS.settings.DistributionMethod.choices.ring-method"),
-		"point-buy-method":  game.i18n.localize("RNCS.settings.DistributionMethod.choices.point-buy-method")
-	};
 
 	// Resolve the player's current preference, defaulting to the first allowed method
 	let currentMethod = _settings.DistributionMethod;
 	if (!allowedMethods.includes(currentMethod)) { currentMethod = allowedMethods[0]; }
 
-	// Build the confirm dialog content, including a method dropdown when multiple methods are allowed
+	// Build method dropdown HTML for the dialog (shown only when multiple methods are allowed)
 	let methodSelectHtml = "";
 	if (allowedMethods.length > 1) {
-		const options = allowedMethods.map(m =>
-			`<option value="${m}"${m === currentMethod ? " selected" : ""}>${methodLabels[m]}</option>`
-		).join("");
+		const options = allowedMethods.map(m => {
+			const label = game.i18n.localize("RNCS.settings.DistributionMethod.choices." + m);
+			return `<option value="${m}"${m === currentMethod ? " selected" : ""}>${label}</option>`;
+		}).join("");
 		methodSelectHtml = `<div style="margin-top:6px;"><label style="font-weight:600;">${game.i18n.localize("RNCS.settings.DistributionMethod.Name")}:&nbsp;</label><select name="rncs_method" style="height:1.8em;">${options}</select></div>`;
 	}
 
-	// Temporarily set the distribution method so GetMethodText() reflects the current choice.
-	// We re-read it after the dialog is confirmed.
-	await game.settings.set(settingsKey, "DistributionMethod", currentMethod);
-	dice_roller = new DiceRoller();
+	// Build dialog method text using currentMethod without a permanent settings write.
+	// Temporarily override _settings on a throwaway DiceRoller instance so GetMethodText()
+	// reflects the current/default choice before the player makes their selection.
+	let dice_roller = new DiceRoller();
+	dice_roller._settings.DistributionMethod = currentMethod;
 
 	const isPointBuy = (currentMethod === "point-buy-method");
 	let title = isPointBuy
@@ -271,7 +264,7 @@ export async function RollStats() {
 
 	if (!result) return; // cancelled or closed
 
-	// Persist the player's chosen distribution method
+	// Persist the player's chosen distribution method only after confirmation
 	const chosenMethod = allowedMethods.includes(result) ? result : currentMethod;
 	await game.settings.set(settingsKey, "DistributionMethod", chosenMethod);
 

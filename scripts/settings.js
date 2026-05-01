@@ -1,6 +1,9 @@
 import { RNCS } from "./main.js";
 export const settingsKey = "roll-new-character-stats";
 
+// All supported distribution method keys, in display order
+export const ALL_DISTRIBUTION_METHODS = ["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"];
+
 // ***********************************************************************************************
 //
 // MAKE SURE YOU ADD NEW SETTINGS TO ./registered-settings.js 
@@ -340,7 +343,7 @@ export function registerSettings() {
         scope: "world",
         config: false,
         type: String,
-        default: JSON.stringify(["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"])
+        default: JSON.stringify(ALL_DISTRIBUTION_METHODS)
     });
 
     game.settings.register(settingsKey, "DistributionMethod", {
@@ -524,8 +527,7 @@ class RollAndDistributionMethodSettings extends foundry.applications.api.Handleb
             const data = formData.object;
 
             // Collect allowed distribution methods from checkboxes
-            const allMethods = ["apply-as-rolled", "distribute-freely", "ring-method", "point-buy-method"];
-            const allowedMethods = allMethods.filter(m => data["rncs_AllowedMethod_" + m] === true);
+            const allowedMethods = ALL_DISTRIBUTION_METHODS.filter(m => data["rncs_AllowedMethod_" + m] === true);
             // Ensure at least one method is allowed
             const methodsToSave = allowedMethods.length > 0 ? allowedMethods : ["apply-as-rolled"];
 

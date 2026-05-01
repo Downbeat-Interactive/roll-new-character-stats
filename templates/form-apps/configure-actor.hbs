@@ -169,9 +169,9 @@
         // For point-buy-method, uses 5e PHB scaling: scores 8-13 cost 1 pt each,
         // 14 costs 2 pts extra (7 total), 15 costs 2 pts extra (9 total). Max score is 15.
         function getPointBuyCost(currentScore) {
-            if (currentScore >= 15) return Infinity; // already at max
-            if (currentScore >= 13) return 2;        // 13→14 or 14→15 costs 2 points
-            return 1;                                // 8→13 costs 1 point per step
+            if (currentScore >= 15) return null;         // already at max (15); + not allowed
+            if (currentScore >= 13) return 2;            // 13→14 or 14→15 costs 2 points
+            return 1;                                    // 8→13 costs 1 point per step
         }
 
         function getPointBuyRefund(currentScore) {
@@ -200,7 +200,7 @@
             } else if (bp_button.id.includes("plus")) {
 
                 const cost = isPointBuy ? getPointBuyCost(8 + bp_points_value) : 1;
-                if (cost !== Infinity && bp_remaining >= cost) {
+                if (cost !== null && bp_remaining >= cost) {
                     bp_points.innerText = bp_points_value + 1;
                     bp_remaining -= cost;
                     span_bp_remaining.innerText = bp_remaining;
