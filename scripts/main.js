@@ -22,7 +22,6 @@ Hooks.once("init", () => {
 	Handlebars.registerHelper("if_AorB", function (a, b, options) {
 		if (a || b) { return options.fn(this); } else { return options.inverse(this); }
 	});
-	document.addEventListener("change", OnMethodSelectChange);
 	console.log(RNCS.ID + " | Initialized")
 
 });
@@ -143,6 +142,22 @@ function OnMethodSelectChange(event) {
 	UpdateMethodDescription(select);
 }
 
+let methodSelectListenerCount = 0;
+
+function RegisterMethodSelectListener() {
+	if (methodSelectListenerCount === 0) {
+		document.addEventListener("change", OnMethodSelectChange);
+	}
+	methodSelectListenerCount += 1;
+}
+
+function UnregisterMethodSelectListener() {
+	methodSelectListenerCount = Math.max(0, methodSelectListenerCount - 1);
+	if (methodSelectListenerCount === 0) {
+		document.removeEventListener("change", OnMethodSelectChange);
+	}
+}
+
 export class RNCS {
 	static ID = 'roll-new-character-stats';
 
@@ -259,29 +274,35 @@ export async function RollStats() {
 	const dialogContent = `<small><div class="rncs-method-picker">${methodSelectHtml}<div class="rncs-method-description-list">${methodDescriptionsHtml}</div><p>${question}</p></div></small>`;
 
 	// Use DialogV2.wait so we can read the method dropdown value on confirm
-	const result = await foundry.applications.api.DialogV2.wait({
-		window: { title: title },
-		content: dialogContent,
-		buttons: [
-			{
-				action: "confirm",
-				label: game.i18n.localize("Yes"),
-				icon: "fa fa-check",
-				callback: (event, button) => {
-					const sel = button.form?.elements?.rncs_method;
-					return sel ? sel.value : currentMethod;
+	RegisterMethodSelectListener();
+	let result = null;
+	try {
+		result = await foundry.applications.api.DialogV2.wait({
+			window: { title: title },
+			content: dialogContent,
+			buttons: [
+				{
+					action: "confirm",
+					label: game.i18n.localize("Yes"),
+					icon: "fa fa-check",
+					callback: (event, button) => {
+						const sel = button.form?.elements?.rncs_method;
+						return sel ? sel.value : currentMethod;
+					}
+				},
+				{
+					action: "cancel",
+					label: game.i18n.localize("No"),
+					icon: "fa fa-times",
+					default: true,
+					callback: () => null
 				}
-			},
-			{
-				action: "cancel",
-				label: game.i18n.localize("No"),
-				icon: "fa fa-times",
-				default: true,
-				callback: () => null
-			}
-		],
-		rejectClose: false
-	});
+			],
+			rejectClose: false
+		});
+	} finally {
+		UnregisterMethodSelectListener();
+	}
 
 	if (!result) return; // cancelled or closed
 
