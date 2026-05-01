@@ -25,7 +25,6 @@ Hooks.on('renderConfigureActor', () => {
         div_ring_result.addEventListener("dragstart", dragstart_handler);
     }
     if (typeof window.Initialize === "function") window.Initialize();
-    else if (typeof window.Intitialize === "function") window.Intitialize();
 });
 
 function dragstart_handler(ev) {

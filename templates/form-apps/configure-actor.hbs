@@ -147,8 +147,7 @@
                 } else {
                     ring_start = (ring_start - 1 === -1 ? individual_rolls_remaining.rolls.length - 1 : ring_start - 1)%individual_rolls_remaining.rolls.length;
                 }
-            }
-            else {
+            } else {
                 if (!ring_reverse) {
                     ring_start = (ring_start - 1 === -1 ? individual_rolls_remaining.rolls.length - 1 : ring_start - 1)%individual_rolls_remaining.rolls.length;
                 } else {
@@ -496,8 +495,7 @@
             if (individual_rolls_remaining.rolls.length - ring_start >= 3) {
                 individual_rolls_remaining.rolls.splice(ring_start, 3);
                 ring_start = (ring_start)%individual_rolls_remaining.rolls.length;
-            }
-            else {
+            } else {
                 let diff = individual_rolls_remaining.rolls.length - ring_start;
                 individual_rolls_remaining.rolls.splice(ring_start, diff);
                 individual_rolls_remaining.rolls.splice(0, 3 - diff);
@@ -528,7 +526,6 @@
         }
 
         window.Initialize = Initialize;
-        window.Intitialize = Initialize;
         window.MoveResult = MoveResult;
         window.BPchange = BPchange;
         window.UpdateRaceBonus = UpdateRaceBonus;
