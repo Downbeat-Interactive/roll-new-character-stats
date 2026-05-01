@@ -46,23 +46,20 @@ async function onRenderActorDirectory(app, html) {
 	});
 }
 
-Hooks.on("renderChatMessageHTML", (app, html) => {
-	// Find buttons with class "rncs-configure-new-actor"
+Hooks.on("renderChatMessageHTML", (chatMessage, html) => {
+	// Hide the configure button if the user cannot create actors
 	const buttons = html.querySelectorAll(".rncs-configure-new-actor");
 	if (!game.user.can("ACTOR_CREATE")) {
 		buttons.forEach(button => {
 			button.classList.add("rncs-display-none");
 		});
 	}
-});
 
-Hooks.on("renderChatMessage", (chatMessage, html) => {
-	// Check if the message is from RNCS
+	// Attach click listener to the Configure Actor button for RNCS messages
 	if (chatMessage.flags?.roll_new_character_stats) {
-		// Find the Configure Actor button
 		const configureButton = html.querySelector(".rncs-configure-new-actor button[data-action='configure_new_actor']");
 		configureButton?.addEventListener("click", (event) => {
-			event.preventDefault(); // Prevent default behavior
+			event.preventDefault();
 			const msgId = chatMessage.id;
 			const flags = chatMessage.flags.roll_new_character_stats;
 
