@@ -267,7 +267,7 @@ export async function RollStats() {
 	for (let _actor = 0; _actor < new DiceRoller()._settingNumberOfActors(); _actor += 1) {
 
 		// Roll abilities
-		dice_roller = new DiceRoller()
+		let dice_roller = new DiceRoller()
 		await dice_roller.RollThemDice();
 
 		// Show results
