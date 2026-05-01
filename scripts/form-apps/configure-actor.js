@@ -24,7 +24,7 @@ Hooks.on('renderConfigureActor', () => {
     if (div_ring_result) {
         div_ring_result.addEventListener("dragstart", dragstart_handler);
     }
-    Intitialize();
+    if (typeof Intitialize !== 'undefined') Intitialize();
 });
 
 function dragstart_handler(ev) {

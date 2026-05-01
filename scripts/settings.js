@@ -389,7 +389,7 @@ export function registerSettings() {
 }
 
 Hooks.on('renderChatSettings', () => {
-    Intitialize();
+    if (typeof Intitialize !== 'undefined') Intitialize();
 });
 
 class ChatSettings extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
